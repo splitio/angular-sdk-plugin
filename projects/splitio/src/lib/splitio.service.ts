@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { SplitFactory } from "@splitsoftware/splitio"
+import { SplitFactory } from "@splitsoftware/splitio";
+import  SplitIO  from "@splitsoftware/splitio/types/splitio";
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class SplitioService {
 
   /**

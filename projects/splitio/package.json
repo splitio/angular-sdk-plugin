@@ -1,12 +1,15 @@
 {
   "name": "splitio",
   "version": "0.0.1",
+  "dependencies": {
+    "@splitsoftware/splitio": "^10.17.2"
+  },
   "peerDependencies": {
     "@angular/common": "^13.2.4",
     "@angular/core": "^13.2.4",
     "core-js": "^2.6.12",
     "rxjs": "^7.5.4",
-    "@splitsoftware/splitio": "^10.17.2",
-    "zone.js": "^0.11.4"
+    "zone.js": "^0.11.4",
+    "ajv": "^6.9.1"
   }
 }

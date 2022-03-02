@@ -8,15 +8,15 @@ export class SplitioService {
   /**
    * The local reference to the Split SDK.
    */
-  splitio: SplitIO.ISDK;
+  private splitio: SplitIO.IBrowserSDK;
   /**
    * The local reference to the Split SDK's Client.
    */
-  splitClient: SplitIO.IClient;
+  private splitClient: SplitIO.IBrowserClient;
   /**
    * The local reference to the Split SDK's Manager.
    */
-  splitManager: SplitIO.IManager
+  private splitManager: SplitIO.IManager
   /**
    * Flag to determine if SDK is ready or not.
    */
@@ -52,6 +52,40 @@ export class SplitioService {
       this.isReady = true;
       console.log('angular SDK plugin ready')
     })
+  }
+
+  /**
+   * Returns a Treatment value, which is the treatment string for the given feature. For usage on NodeJS as we don't have only one key.
+   *
+   * @function — getTreatment
+   *
+   * @param key — The string key representing the consumer.
+   *
+   * @param splitName — The string that represents the split we wan't to get the treatment.
+   *
+   * @param attributes — An object of type Attributes defining the attributes for the given key.
+   *
+   * @returns — The treatment string.
+   */
+  getTreatment(splitName: string, attributes?: SplitIO.Attributes): SplitIO.Treatment {
+    return this.splitClient.getTreatment(splitName, attributes);
+  }
+
+  /**
+   * Returns a TreatmentWithConfig value, which is an object with both treatment and config string for the given feature.
+   *
+   * @function — getTreatmentWithConfig
+   *
+   * @param key — The string key representing the consumer.
+   *
+   * @param splitName — The string that represents the split we wan't to get the treatment.
+   *
+   * @param attributes — An object of type Attributes defining the attributes for the given key.
+   *
+   * @returns The TreatmentWithConfig, the object containing the treatment string and the configuration stringified JSON (or null if there was no config for that treatment).
+   */
+  getTreatmentWithConfig(splitName: string, attributes?: SplitIO.Attributes): SplitIO.TreatmentWithConfig {
+    return this.splitClient.getTreatmentWithConfig(splitName, attributes);
   }
 
 }

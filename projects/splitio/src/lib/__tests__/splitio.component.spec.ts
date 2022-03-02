@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SplitioComponent } from './splitio.component';
+import { SplitioComponent } from '../splitio.component';
 
 describe('SplitioComponent', () => {
   let component: SplitioComponent;

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { SplitFactory } from "@splitsoftware/splitio";
-import  SplitIO  from "@splitsoftware/splitio/types/splitio";
+import { SplitFactory } from "@splitsoftware/splitio-browserjs/full";
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class SplitioService {
@@ -8,11 +8,11 @@ export class SplitioService {
   /**
    * The local reference to the Split SDK.
    */
-  private splitio: SplitIO.IBrowserSDK;
+  private splitio: SplitIO.ISDK;
   /**
    * The local reference to the Split SDK's Client.
    */
-  private splitClient: SplitIO.IBrowserClient;
+  private splitClient: SplitIO.IClient;
   /**
    * The local reference to the Split SDK's Manager.
    */
@@ -20,10 +20,17 @@ export class SplitioService {
   /**
    * Flag to determine if SDK is ready or not.
    */
-  isReady = false;
+  isSdkReady = false;
 
+  SDKReady$: Observable<string>;
+  SDKReadyTimeOut$: Observable<string>;
+  SDKReadyFromCache$: Observable<string>;
+  SDKUpdate$: Observable<string>;
 
-  constructor() {  }
+  settings: SplitIO.IBrowserSettings
+
+  constructor() { }
+
 
   /**
    * This method initializes the SDK with the required Browser APIKEY
@@ -32,26 +39,77 @@ export class SplitioService {
    * @returns void
    */
   initSdk(settings: SplitIO.IBrowserSettings): void {
+    this.settings = settings;
     this.splitio = SplitFactory(settings);
     this.splitClient = this.splitio.client();
     this.splitManager = this.splitio.manager();
-
-    // verify if sdk is initialized
-    this.verifyReady();
+    this.sdkInitEventObservable();
   }
 
   /**
-   * Function to check if the SDK is ready, subscribe to an Observable
-   * and set the isReady flag according to the result.
+   * This method initializes the SDK with the required Browser APIKEY
+   * and waits for the SDK to be ready
    *
-   * @returns void
+   * @returns Promise<void>
    */
-  private verifyReady(): void {
-
-    this.splitClient.on(this.splitClient.Event.SDK_READY, () => {
-      this.isReady = true;
-      console.log('angular SDK plugin ready')
+  async initSDKReady(settings: SplitIO.IBrowserSettings): Promise<void> {
+    this.initSdk(settings);
+    await this.splitClient.ready().then(() => {
+      this.isSdkReady = true;
     })
+  }
+
+  /**
+   * initialize sdk Events into observables
+   */
+  private sdkInitEventObservable(): void {
+    this.SDKReady$ = this.toObservable(this.splitClient.Event.SDK_READY);
+    this.SDKReadyTimeOut$ = this.toObservable(this.splitClient.Event.SDK_READY_TIMED_OUT);
+    this.SDKReadyFromCache$ = this.toObservable(this.splitClient.Event.SDK_READY_FROM_CACHE);
+    this.SDKUpdate$ = this.toObservable(this.splitClient.Event.SDK_UPDATE);
+  }
+
+  /**
+   * Private function to return as observable the event on parameter
+   *
+   * @param event
+   * @returns Observable<string>
+   */
+  private toObservable(event: string): Observable<string> {
+    return new Observable(subscriber => {
+      this.splitClient.on(event, () => {
+        subscriber.next(event);
+      });
+    });
+  }
+
+  /**
+   * Returns a promise that will be resolved once the SDK has finished loading (SDK_READY event emitted) or rejected if the SDK has timedout (SDK_READY_TIMED_OUT event emitted).
+   * As it's meant to provide similar flexibility to the event approach, given that the SDK might be eventually ready after a timeout event,
+   * calling the ready method after the SDK had timed out will return a new promise that should eventually resolve if the SDK gets ready.
+   *
+   * @returns Promise<void>
+   */
+  ready(): Promise<void> {
+    return this.splitClient.ready();
+  }
+
+  /**
+   * Returns the SDK client
+   *
+   * @returns SplitIO.IClient
+   */
+  getSDKClient(): SplitIO.IClient{
+    return this.splitClient;
+  }
+
+  /**
+   * Returns the SDK factory
+   *
+   * @returns SplitIO.ISDK
+   */
+  getSDKFactory(): SplitIO.ISDK{
+    return this.splitio;
   }
 
   /**

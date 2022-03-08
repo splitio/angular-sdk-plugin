@@ -7,7 +7,7 @@
     "build": "ng build",
     "build_lib": "ng build splitio",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
+    "test": "ng test splitio --browsers ChromeHeadless --watch=false",
     "npm_pack": "cd dist/splitio && npm pack",
     "package": "npm run build_lib && npm run npm_pack"
   },

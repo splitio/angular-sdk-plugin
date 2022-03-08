@@ -55,11 +55,9 @@ export class SplitioService {
   }
 
   /**
-   * Returns a Treatment value, which is the treatment string for the given feature. For usage on NodeJS as we don't have only one key.
+   * Returns a Treatment value, which is the treatment string for the given feature.
    *
    * @function — getTreatment
-   *
-   * @param key — The string key representing the consumer.
    *
    * @param splitName — The string that represents the split we wan't to get the treatment.
    *
@@ -75,8 +73,6 @@ export class SplitioService {
    * Returns a TreatmentWithConfig value, which is an object with both treatment and config string for the given feature.
    *
    * @function — getTreatmentWithConfig
-   *
-   * @param key — The string key representing the consumer.
    *
    * @param splitName — The string that represents the split we wan't to get the treatment.
    *

@@ -30,7 +30,13 @@ describe('SplitioService', () => {
     });
     service.SDKReady$.subscribe(() => {
       expect(service.isSDKReady).toEqual(true);
-      service.getSDKFactory().settings.features = { test_split: 'off' };
+
+      // subscribed again to ensure that is called even if the event was already emitted
+      // and to verify that we can subscribe more than once to the observable
+      service.SDKReady$.subscribe(() => {
+        // this callback modifies the factory features so the update event will emit and finish this test with done function
+        service.getSDKFactory().settings.features = { test_split: 'off' };
+      });
     });
   });
 

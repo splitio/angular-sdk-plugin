@@ -2,7 +2,7 @@
   "name": "splitio",
   "version": "0.0.1",
   "dependencies": {
-    "@splitsoftware/splitio": "^10.17.2"
+    "@splitsoftware/splitio-browserjs": "^0.4.1"
   },
   "peerDependencies": {
     "@angular/common": "^13.2.4",

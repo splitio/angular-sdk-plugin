@@ -76,10 +76,16 @@ export class SplitioService {
    * @returns Observable<string>
    */
   private toObservable(event: string): Observable<string> {
+    let wasEventEmitted = false;
     return new Observable(subscriber => {
-      this.splitClient.on(event, () => {
+      if (wasEventEmitted) {
         subscriber.next(event);
-      });
+      } else {
+        this.splitClient.on(event, () => {
+          wasEventEmitted = true;
+          subscriber.next(event);
+        });
+      }
     });
   }
 

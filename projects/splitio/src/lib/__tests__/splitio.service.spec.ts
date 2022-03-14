@@ -1,4 +1,5 @@
 import { SplitioService } from '../splitio.service';
+import { mockedSplitView } from './mocks/SplitView.mock';
 import { config, localhostConfig } from './testUtils/sdkConfigs';
 
 describe('SplitioService', () => {
@@ -98,13 +99,13 @@ describe('SplitioService', () => {
   });
 
   test('SDK Manager', (done) => {
-    expect(service.manager).toBeUndefined();
+    expect(service.getSpliNames()).toEqual([]);
     service.init(localhostConfig);
     service.SDKReady$.subscribe(() => {
-      expect(service.manager.splits()).toEqual(service.getSDKManager().splits());
-      expect(service.manager.names()).toEqual(service.getSDKManager().names());
-      expect(service.manager.split('test_split2')).toEqual(service.getSDKManager().split('test_split2'));
-      expect(service.manager.split('nonexistent_split')).toBeNull();
+      expect(service.getSplitViews()).toEqual(mockedSplitView);
+      expect(service.getSpliNames()).toEqual(mockedSplitView.map(split => split.name))
+      expect(service.getSplitView('test_split2')).toEqual(mockedSplitView[1]);
+      expect(service.getSplitView('nonexistent_split')).toBeNull();
       done();
     });
   });

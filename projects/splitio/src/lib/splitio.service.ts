@@ -23,8 +23,6 @@ export class SplitioService {
    */
   isSDKReady = false;
 
-  manager: any;
-
   SDKReady$: Observable<string>;
   SDKReadyTimeOut$: Observable<string>;
   SDKReadyFromCache$: Observable<string>;
@@ -34,7 +32,6 @@ export class SplitioService {
 
   constructor() { }
 
-
   /**
    * This method initializes the SDK with the required Browser APIKEY
    * and the 'key' according to the Traffic type set (ex.: an user id).
@@ -43,17 +40,8 @@ export class SplitioService {
    * @returns void
    */
   init(settings: SplitIO.IBrowserSettings): void {
-    if (this.splitio) {
-      console.error('there is another instance of the SDK');
-      return
-    }
-    this.settings = settings;
-    this.splitio = SplitFactory(settings);
-    this.splitClient = this.splitio.client()
-    this.sdkInitManager();
-    this.setReady()
-    this.splitManager = this.splitio.manager();
-    this.sdkInitEventObservable();
+    this.initSdk(settings);
+    this.setReady();
   }
 
   /**
@@ -64,8 +52,20 @@ export class SplitioService {
    * @returns Promise<void>
    */
   async initWaitForReady(settings: SplitIO.IBrowserSettings): Promise<SplitIO.IClient> {
-    this.init(settings);
-    return await this.setReady()
+    this.initSdk(settings);
+    return await this.setReady();
+  }
+
+  private initSdk(settings: SplitIO.IBrowserSettings): void {
+    if (this.splitio) {
+      console.error('there is another instance of the SDK');
+      return
+    }
+    this.settings = settings;
+    this.splitio = SplitFactory(settings);
+    this.splitClient = this.splitio.client()
+    this.splitManager = this.splitio.manager();
+    this.sdkInitEventObservable();
   }
 
   private setReady(): IClient {
@@ -119,23 +119,7 @@ export class SplitioService {
   }
 
   /**
-   * initialize sdk Manager
-   */
-  private sdkInitManager(): void {
-    const sdkClient = this.splitio.client();
-    sdkClient.on(sdkClient.Event.SDK_READY, () => {
-      const sdkManager = this.splitio.manager()
-      this.manager = {
-        split: sdkManager.split,
-        splits: sdkManager.splits,
-        names: sdkManager.names
-      }
-    })
-  }
-
-  /**
    * Private function to return as observable the event on parameter
-   *
    * @param event
    * @returns Observable<string>
    */
@@ -157,7 +141,6 @@ export class SplitioService {
    * Returns a promise that will be resolved once the SDK has finished loading (SDK_READY event emitted) or rejected if the SDK has timedout (SDK_READY_TIMED_OUT event emitted).
    * As it's meant to provide similar flexibility to the event approach, given that the SDK might be eventually ready after a timeout event,
    * calling the ready method after the SDK had timed out will return a new promise that should eventually resolve if the SDK gets ready.
-   *
    * @returns Promise<void>
    */
   ready(): Promise<void> {
@@ -166,7 +149,6 @@ export class SplitioService {
 
   /**
    * Returns the SDK client
-   *
    * @returns SplitIO.IClient
    */
   getSDKClient(): SplitIO.IClient{
@@ -175,20 +157,10 @@ export class SplitioService {
 
   /**
    * Returns the SDK factory
-   *
    * @returns SplitIO.ISDK
    */
   getSDKFactory(): SplitIO.ISDK{
     return this.splitio;
-  }
-
-  /**
-   * Returns the SDK factory
-   *
-   * @returns SplitIO.ISDK
-   */
-   getSDKManager(): SplitIO.IManager{
-    return this.splitManager;
   }
 
   /**
@@ -235,4 +207,31 @@ export class SplitioService {
     return this.splitClient.getTreatmentsWithConfig(splitNames, attributes);
   }
 
+  /**
+   * Get the array of splits data in SplitView format.
+   * @function getSplitViews
+   * @returns {SplitViews} The list of SplitIO.SplitView.
+   */
+  getSplitViews(): SplitIO.SplitViews {
+    return this.isSDKReady ? this.splitManager.splits() : [];
+  }
+
+  /**
+   * Get the data of a split in SplitView format.
+   * @function split
+   * @param {string} splitName The name of the split we wan't to get info of.
+   * @returns {SplitView} The SplitIO.SplitView of the given split.
+   */
+  getSplitView(splitName: string): SplitIO.SplitView | null {
+    return this.isSDKReady ? this.splitManager.split(splitName) : null;
+  }
+
+  /**
+   * Get the array of Split names.
+   * @function names
+   * @returns {SplitNames} The lists of Split names.
+   */
+  getSpliNames(): SplitIO.SplitNames {
+    return this.isSDKReady ? this.splitManager.names() : [];
+  }
 }

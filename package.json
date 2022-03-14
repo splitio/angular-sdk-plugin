@@ -50,7 +50,8 @@
     "testPathIgnorePatterns": [
       "<rootDir>/node_modules/",
       "<rootDir>/dist/",
-      "<rootDir>/projects/splitio/src/lib/__tests__/testUtils/"
+      "<rootDir>/projects/splitio/src/lib/__tests__/testUtils/",
+      "<rootDir>/projects/splitio/src/lib/__tests__/mocks/"
     ],
     "globals": {
       "ts-jest": {

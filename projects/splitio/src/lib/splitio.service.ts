@@ -126,9 +126,9 @@ export class SplitioService {
     sdkClient.on(sdkClient.Event.SDK_READY, () => {
       const sdkManager = this.splitio.manager()
       this.manager = {
-        split : sdkManager.split,
-        splits : sdkManager.splits,
-        names : sdkManager.names
+        split: sdkManager.split,
+        splits: sdkManager.splits,
+        names: sdkManager.names
       }
     })
   }

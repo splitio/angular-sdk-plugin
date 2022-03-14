@@ -96,4 +96,15 @@ describe('SplitioService', () => {
       });
     });
   });
+
+  test('SDK Manager', (done) => {
+    expect(service.manager).toBeUndefined()
+    service.init(localhostConfig);
+    service.SDKReady$.subscribe(() => {
+      expect(service.manager.splits()).toEqual(service.getSDKManager().splits())
+      expect(service.manager.names()).toEqual(service.getSDKManager().names())
+      expect(service.manager.split('test_split2')).toEqual(service.getSDKManager().split('test_split2'))
+      done();
+    });
+  });
 });

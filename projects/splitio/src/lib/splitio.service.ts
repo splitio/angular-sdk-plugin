@@ -23,6 +23,8 @@ export class SplitioService {
    */
   isSDKReady = false;
 
+  manager: any;
+
   SDKReady$: Observable<string>;
   SDKReadyTimeOut$: Observable<string>;
   SDKReadyFromCache$: Observable<string>;
@@ -48,6 +50,7 @@ export class SplitioService {
     this.settings = settings;
     this.splitio = SplitFactory(settings);
     this.splitClient = this.splitio.client()
+    this.sdkInitManager();
     this.setReady()
     this.splitManager = this.splitio.manager();
     this.sdkInitEventObservable();
@@ -116,6 +119,21 @@ export class SplitioService {
   }
 
   /**
+   * initialize sdk Manager
+   */
+  private sdkInitManager(): void {
+    const sdkClient = this.splitio.client();
+    sdkClient.on(sdkClient.Event.SDK_READY, () => {
+      const sdkManager = this.splitio.manager()
+      this.manager = {
+        split : sdkManager.split,
+        splits : sdkManager.splits,
+        names : sdkManager.names
+      }
+    })
+  }
+
+  /**
    * Private function to return as observable the event on parameter
    *
    * @param event
@@ -162,6 +180,15 @@ export class SplitioService {
    */
   getSDKFactory(): SplitIO.ISDK{
     return this.splitio;
+  }
+
+  /**
+   * Returns the SDK factory
+   *
+   * @returns SplitIO.ISDK
+   */
+   getSDKManager(): SplitIO.IManager{
+    return this.splitManager;
   }
 
   /**

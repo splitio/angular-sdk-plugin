@@ -40,8 +40,9 @@ export class SplitioService {
    * @returns void
    */
   init(settings: SplitIO.IBrowserSettings): void {
-    this.initSdk(settings);
-    this.setReady();
+    this.initSdk(settings).on(this.splitClient.Event.SDK_READY, () => {
+      this.isSDKReady = true;
+    });
   }
 
   /**
@@ -49,29 +50,25 @@ export class SplitioService {
    * and waits for the SDK to be ready
    * @function initWaitForReady
    * @param {IBrowserSettings} settings Should be an object that complies with the SplitIO.IBrowserSettings.
-   * @returns Promise<void>
+   * @returns Observable<IClient>
    */
-  async initWaitForReady(settings: SplitIO.IBrowserSettings): Promise<SplitIO.IClient> {
-    this.initSdk(settings);
-    return await this.setReady();
+  initWaitForReady(settings: SplitIO.IBrowserSettings): Observable<SplitIO.IClient> {
+    const client = this.initSdk(settings);
+    // @TODO check return type
+    return this.toObservable(client, client.Event.SDK_READY, client)
   }
 
-  private initSdk(settings: SplitIO.IBrowserSettings): void {
+  private initSdk(settings: SplitIO.IBrowserSettings): SplitIO.IClient {
     if (this.splitio) {
-      console.error('there is another instance of the SDK');
-      return
+      console.log('[ERROR] There is another instance of the SDK.');
+      return this.splitClient;
     }
     this.settings = settings;
     this.splitio = SplitFactory(settings);
     this.splitClient = this.splitio.client()
     this.splitManager = this.splitio.manager();
     this.sdkInitEventObservable();
-  }
-
-  private setReady(): IClient {
-    return this.splitClient.on(this.splitClient.Event.SDK_READY, () => {
-      this.isSDKReady = true;
-    });
+    return this.splitClient;
   }
 
   /**
@@ -80,13 +77,25 @@ export class SplitioService {
    * @param {SplitKey} key The key for the new client instance.
    * @returns {IClient} The client instance.
    */
-  async initForKey(key: SplitIO.SplitKey): Promise<SplitIO.IClient> {
-    return this.splitio.client(key)
+  initForKey(key: SplitIO.SplitKey): SplitIO.IClient {
+    return this.splitio.client(key);
+  }
+
+  /**
+   * This method initializes the SDK with the required Browser APIKEY
+   * and waits for the shared client SDK to be ready
+   * @function initForKeyWaitForReady
+   * @param {SplitKey} key The key for the new client instance.
+   * @returns Observable<IClient>
+   */
+  initForKeyWaitForReady(key: SplitIO.SplitKey): Observable<SplitIO.IClient> {
+    const client = this.initForKey(key);
+    return this.toObservable(client, client.Event.SDK_READY, client)
   }
 
   /**
    * Returns treatment methods for a shared client, associated with the given key
-   * @function initForKeyWaitForReady
+   * @function get
    * @param {SplitKey} key The key for the client instance.
    * @returns Treatment methods for shared client
    */
@@ -112,26 +121,28 @@ export class SplitioService {
    * initialize sdk Events into observables
    */
   private sdkInitEventObservable(): void {
-    this.SDKReady$ = this.toObservable(this.splitClient.Event.SDK_READY);
-    this.SDKReadyTimeOut$ = this.toObservable(this.splitClient.Event.SDK_READY_TIMED_OUT);
-    this.SDKReadyFromCache$ = this.toObservable(this.splitClient.Event.SDK_READY_FROM_CACHE);
-    this.SDKUpdate$ = this.toObservable(this.splitClient.Event.SDK_UPDATE);
+    const client = this.splitClient;
+    this.SDKReady$ = this.toObservable(client, client.Event.SDK_READY, client.Event.SDK_READY);
+    this.SDKReadyTimeOut$ = this.toObservable(client, client.Event.SDK_READY_TIMED_OUT, client.Event.SDK_READY_TIMED_OUT);
+    this.SDKReadyFromCache$ = this.toObservable(client, client.Event.SDK_READY_FROM_CACHE, client.Event.SDK_READY_FROM_CACHE);
+    this.SDKUpdate$ = this.toObservable(client, client.Event.SDK_UPDATE, client.Event.SDK_UPDATE);
   }
 
   /**
    * Private function to return as observable the event on parameter
-   * @param event
-   * @returns Observable<string>
+   * @param {string} event
+   * @param response
+   * @returns Observable<any>
    */
-  private toObservable(event: string): Observable<string> {
+  private toObservable(client: IClient, event: string, response: any): Observable<any> {
     let wasEventEmitted = false;
     return new Observable(subscriber => {
       if (wasEventEmitted) {
-        subscriber.next(event);
+        subscriber.next(response);
       } else {
-        this.splitClient.on(event, () => {
+        client.on(event, () => {
           wasEventEmitted = true;
-          subscriber.next(event);
+          subscriber.next(response);
         });
       }
     });
@@ -149,7 +160,7 @@ export class SplitioService {
 
   /**
    * Returns the SDK client
-   * @returns SplitIO.IClient
+   * @returns {IClient} split client.
    */
   getSDKClient(): SplitIO.IClient{
     return this.splitClient;
@@ -157,7 +168,7 @@ export class SplitioService {
 
   /**
    * Returns the SDK factory
-   * @returns SplitIO.ISDK
+   * @returns {ISDK} split factory
    */
   getSDKFactory(): SplitIO.ISDK{
     return this.splitio;
@@ -167,7 +178,7 @@ export class SplitioService {
    * Returns a Treatment value, which is the treatment string for the given feature.
    * @function getTreatment
    * @param {string} splitName - The string that represents the split we wan't to get the treatment.
-   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
+   * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {Treatment} The treatment string.
    */
   getTreatment(splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.Treatment {
@@ -178,7 +189,7 @@ export class SplitioService {
    * Returns a TreatmentWithConfig value, which is an object with both treatment and config string for the given feature.
    * @function getTreatmentWithConfig
    * @param {string} splitName - The string that represents the split we wan't to get the treatment.
-   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
+   * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {TreatmentWithConfig} The map containing the treatment and the configuration stringified JSON (or null if there was no config for that treatment).
    */
   getTreatmentWithConfig(splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentWithConfig {
@@ -189,7 +200,7 @@ export class SplitioService {
    * Returns a Treatments value, which is an object map with the treatments for the given features.
    * @function getTreatments
    * @param {Array<string>} splitNames - An array of the split names we wan't to get the treatments.
-   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
+   * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {Treatments} The treatments object map.
    */
   getTreatments(splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.Treatments {
@@ -200,7 +211,7 @@ export class SplitioService {
    * Returns a TreatmentsWithConfig value, which is an object map with the TreatmentWithConfig (an object with both treatment and config string) for the given features.
    * @function getTreatmentsWithConfig
    * @param {Array<string>} splitNames - An array of the split names we wan't to get the treatments.
-   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
+   * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {TreatmentsWithConfig} The map with all the TreatmentWithConfig objects
    */
   getTreatmentsWithConfig(splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig {
@@ -209,29 +220,41 @@ export class SplitioService {
 
   /**
    * Get the array of splits data in SplitView format.
-   * @function getSplitViews
+   * @function getSplits
    * @returns {SplitViews} The list of SplitIO.SplitView.
    */
-  getSplitViews(): SplitIO.SplitViews {
-    return this.isSDKReady ? this.splitManager.splits() : [];
+  getSplits(): SplitIO.SplitViews {
+    if (!this.splitManager) {
+      console.log('[ERROR] The SDK has not being initialized. Returning default response for `getSplits` method call.');
+      return [];
+    }
+    return this.splitManager.splits();
   }
 
   /**
    * Get the data of a split in SplitView format.
-   * @function split
+   * @function getSplits
    * @param {string} splitName The name of the split we wan't to get info of.
    * @returns {SplitView} The SplitIO.SplitView of the given split.
    */
-  getSplitView(splitName: string): SplitIO.SplitView | null {
-    return this.isSDKReady ? this.splitManager.split(splitName) : null;
+  getSplit(splitName: string): SplitIO.SplitView | null {
+    if (!this.splitManager) {
+      console.log('[ERROR] The SDK has not being initialized. Returning default response for `getSplits` method call.');
+      return null;
+    }
+    return this.splitManager.split(splitName);
   }
 
   /**
    * Get the array of Split names.
-   * @function names
+   * @function getSplitNames
    * @returns {SplitNames} The lists of Split names.
    */
   getSpliNames(): SplitIO.SplitNames {
-    return this.isSDKReady ? this.splitManager.names() : [];
+    if (!this.splitManager) {
+      console.log('[ERROR] The SDK has not being initialized. Returning default response for `getSpliNames` method call.');
+      return [];
+    }
+    return this.splitManager.names();
   }
 }

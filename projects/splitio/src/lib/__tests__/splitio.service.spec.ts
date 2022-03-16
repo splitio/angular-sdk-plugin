@@ -42,12 +42,12 @@ describe('SplitioService', () => {
   });
 
   test('Evaluations', (done) => {
-    service.initWaitForReady(localhostConfig).then(() => {
+    service.initWaitForReady(localhostConfig).subscribe(mainClient => {
       const clientSpy = {
-        getTreatment: jest.spyOn(service.getSDKClient(), 'getTreatment'),
-        getTreatmentWithConfig: jest.spyOn(service.getSDKClient(), 'getTreatmentWithConfig'),
-        getTreatments: jest.spyOn(service.getSDKClient(), 'getTreatments'),
-        getTreatmentsWithConfig: jest.spyOn(service.getSDKClient(), 'getTreatmentsWithConfig'),
+        getTreatment: jest.spyOn(mainClient, 'getTreatment'),
+        getTreatmentWithConfig: jest.spyOn(mainClient, 'getTreatmentWithConfig'),
+        getTreatments: jest.spyOn(mainClient, 'getTreatments'),
+        getTreatmentsWithConfig: jest.spyOn(mainClient, 'getTreatmentsWithConfig'),
       };
       service.getTreatment('test_split');
       expect(clientSpy.getTreatment).toHaveBeenCalled();
@@ -59,7 +59,7 @@ describe('SplitioService', () => {
       expect(clientSpy.getTreatmentsWithConfig).toHaveBeenCalled();
 
       // initialize shared client and wait for ready
-      service.initForKey('myKey2').then((client) => {
+      service.initForKeyWaitForReady('myKey2').subscribe(client => {
         // spy on shared client
         const sharedClientSpy = {
           getTreatment: jest.spyOn(client, 'getTreatment'),
@@ -102,10 +102,10 @@ describe('SplitioService', () => {
     expect(service.getSpliNames()).toEqual([]);
     service.init(localhostConfig);
     service.SDKReady$.subscribe(() => {
-      expect(service.getSplitViews()).toEqual(mockedSplitView);
+      expect(service.getSplits()).toEqual(mockedSplitView);
       expect(service.getSpliNames()).toEqual(mockedSplitView.map(split => split.name))
-      expect(service.getSplitView('test_split2')).toEqual(mockedSplitView[1]);
-      expect(service.getSplitView('nonexistent_split')).toBeNull();
+      expect(service.getSplit('test_split2')).toEqual(mockedSplitView[1]);
+      expect(service.getSplit('nonexistent_split')).toBeNull();
       done();
     });
   });

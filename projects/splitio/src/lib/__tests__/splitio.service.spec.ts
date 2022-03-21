@@ -42,7 +42,10 @@ describe('SplitioService', () => {
   });
 
   test('Evaluations', (done) => {
-    service.initWaitForReady(localhostConfig).subscribe(mainClient => {
+    expect(service.isSDKReady).toEqual(false);
+    service.initWaitForReady(localhostConfig).subscribe(() => {
+      const mainClient = service.getSDKClient();
+      expect(service.isSDKReady).toEqual(true);
       const clientSpy = {
         getTreatment: jest.spyOn(mainClient, 'getTreatment'),
         getTreatmentWithConfig: jest.spyOn(mainClient, 'getTreatmentWithConfig'),
@@ -99,11 +102,11 @@ describe('SplitioService', () => {
   });
 
   test('SDK Manager', (done) => {
-    expect(service.getSpliNames()).toEqual([]);
+    expect(service.getSplitNames()).toEqual([]);
     service.init(localhostConfig);
     service.SDKReady$.subscribe(() => {
       expect(service.getSplits()).toEqual(mockedSplitView);
-      expect(service.getSpliNames()).toEqual(mockedSplitView.map(split => split.name))
+      expect(service.getSplitNames()).toEqual(mockedSplitView.map(split => split.name))
       expect(service.getSplit('test_split2')).toEqual(mockedSplitView[1]);
       expect(service.getSplit('nonexistent_split')).toBeNull();
       done();

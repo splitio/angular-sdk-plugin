@@ -50,12 +50,12 @@ export class SplitioService {
    * and waits for the SDK to be ready
    * @function initWaitForReady
    * @param {IBrowserSettings} settings Should be an object that complies with the SplitIO.IBrowserSettings.
-   * @returns Observable<IClient>
+   * @returns Observable<string>
    */
-  initWaitForReady(settings: SplitIO.IBrowserSettings): Observable<SplitIO.IClient> {
+  initWaitForReady(settings: SplitIO.IBrowserSettings): Observable<string> {
     const client = this.initSdk(settings);
     // @TODO check return type
-    return this.toObservable(client, client.Event.SDK_READY, client)
+    return this.SDKReady$;
   }
 
   private initSdk(settings: SplitIO.IBrowserSettings): SplitIO.IClient {
@@ -141,6 +141,9 @@ export class SplitioService {
         subscriber.next(response);
       } else {
         client.on(event, () => {
+          if (event == client.Event.SDK_READY) {
+            this.isSDKReady = true;
+          }
           wasEventEmitted = true;
           subscriber.next(response);
         });
@@ -233,7 +236,7 @@ export class SplitioService {
 
   /**
    * Get the data of a split in SplitView format.
-   * @function getSplits
+   * @function getSplit
    * @param {string} splitName The name of the split we wan't to get info of.
    * @returns {SplitView} The SplitIO.SplitView of the given split.
    */
@@ -250,9 +253,9 @@ export class SplitioService {
    * @function getSplitNames
    * @returns {SplitNames} The lists of Split names.
    */
-  getSpliNames(): SplitIO.SplitNames {
+  getSplitNames(): SplitIO.SplitNames {
     if (!this.splitManager) {
-      console.log('[ERROR] The SDK has not being initialized. Returning default response for `getSpliNames` method call.');
+      console.log('[ERROR] The SDK has not being initialized. Returning default response for `getSplitNames` method call.');
       return [];
     }
     return this.splitManager.names();

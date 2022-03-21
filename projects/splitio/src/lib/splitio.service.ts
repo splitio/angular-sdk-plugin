@@ -40,7 +40,15 @@ export class SplitioService {
    * @returns void
    */
   init(settings: SplitIO.IBrowserSettings): void {
-    this.initSdk(settings).on(this.splitClient.Event.SDK_READY, () => {
+    if (this.splitio) {
+      console.log('[ERROR] There is another instance of the SDK.');
+    }
+    this.settings = settings;
+    this.splitio = SplitFactory(settings);
+    this.splitClient = this.splitio.client()
+    this.splitManager = this.splitio.manager();
+    this.sdkInitEventObservable();
+    this.splitClient.on(this.splitClient.Event.SDK_READY, () => {
       this.isSDKReady = true;
     });
   }
@@ -53,22 +61,9 @@ export class SplitioService {
    * @returns Observable<string>
    */
   initWaitForReady(settings: SplitIO.IBrowserSettings): Observable<string> {
-    const client = this.initSdk(settings);
+    this.init(settings);
     // @TODO check return type
     return this.SDKReady$;
-  }
-
-  private initSdk(settings: SplitIO.IBrowserSettings): SplitIO.IClient {
-    if (this.splitio) {
-      console.log('[ERROR] There is another instance of the SDK.');
-      return this.splitClient;
-    }
-    this.settings = settings;
-    this.splitio = SplitFactory(settings);
-    this.splitClient = this.splitio.client()
-    this.splitManager = this.splitio.manager();
-    this.sdkInitEventObservable();
-    return this.splitClient;
   }
 
   /**
@@ -141,9 +136,6 @@ export class SplitioService {
         subscriber.next(response);
       } else {
         client.on(event, () => {
-          if (event == client.Event.SDK_READY) {
-            this.isSDKReady = true;
-          }
           wasEventEmitted = true;
           subscriber.next(response);
         });

@@ -1,4 +1,5 @@
 import { SplitioService } from '../splitio.service';
+import { mockedSplitView } from './mocks/SplitView.mock';
 import { config, localhostConfig } from './testUtils/sdkConfigs';
 
 describe('SplitioService', () => {
@@ -41,12 +42,21 @@ describe('SplitioService', () => {
   });
 
   test('Evaluations', (done) => {
-    service.initWaitForReady(localhostConfig).then(() => {
+    expect(service.isSDKReady).toEqual(false);
+    service.initWaitForReady(localhostConfig).subscribe(() => {
+
+      const logSpy = jest.spyOn(console, 'log');
+      service.init(config);
+      expect(logSpy).toHaveBeenCalledWith('[ERROR] There is another instance of the SDK.');
+      expect(service.settings).toEqual(localhostConfig);
+
+      const mainClient = service.getSDKClient();
+      expect(service.isSDKReady).toEqual(true);
       const clientSpy = {
-        getTreatment: jest.spyOn(service.getSDKClient(), 'getTreatment'),
-        getTreatmentWithConfig: jest.spyOn(service.getSDKClient(), 'getTreatmentWithConfig'),
-        getTreatments: jest.spyOn(service.getSDKClient(), 'getTreatments'),
-        getTreatmentsWithConfig: jest.spyOn(service.getSDKClient(), 'getTreatmentsWithConfig'),
+        getTreatment: jest.spyOn(mainClient, 'getTreatment'),
+        getTreatmentWithConfig: jest.spyOn(mainClient, 'getTreatmentWithConfig'),
+        getTreatments: jest.spyOn(mainClient, 'getTreatments'),
+        getTreatmentsWithConfig: jest.spyOn(mainClient, 'getTreatmentsWithConfig'),
       };
       service.getTreatment('test_split');
       expect(clientSpy.getTreatment).toHaveBeenCalled();
@@ -58,7 +68,7 @@ describe('SplitioService', () => {
       expect(clientSpy.getTreatmentsWithConfig).toHaveBeenCalled();
 
       // initialize shared client and wait for ready
-      service.initForKey('myKey2').then((client) => {
+      service.initForKeyWaitForReady('myKey2').subscribe(client => {
         // spy on shared client
         const sharedClientSpy = {
           getTreatment: jest.spyOn(client, 'getTreatment'),
@@ -94,6 +104,18 @@ describe('SplitioService', () => {
         expect(service.getTreatment('non_existent_split')).toEqual('control');
         done()
       });
+    });
+  });
+
+  test('SDK Manager', (done) => {
+    expect(service.getSplitNames()).toEqual([]);
+    service.init(localhostConfig);
+    service.SDKReady$.subscribe(() => {
+      expect(service.getSplits()).toEqual(mockedSplitView);
+      expect(service.getSplitNames()).toEqual(mockedSplitView.map(split => split.name))
+      expect(service.getSplit('test_split2')).toEqual(mockedSplitView[1]);
+      expect(service.getSplit('nonexistent_split')).toBeNull();
+      done();
     });
   });
 });

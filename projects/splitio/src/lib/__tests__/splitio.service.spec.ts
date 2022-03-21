@@ -44,6 +44,12 @@ describe('SplitioService', () => {
   test('Evaluations', (done) => {
     expect(service.isSDKReady).toEqual(false);
     service.initWaitForReady(localhostConfig).subscribe(() => {
+
+      const logSpy = jest.spyOn(console, 'log');
+      service.init(config);
+      expect(logSpy).toHaveBeenCalledWith('[ERROR] There is another instance of the SDK.');
+      expect(service.settings).toEqual(localhostConfig);
+
       const mainClient = service.getSDKClient();
       expect(service.isSDKReady).toEqual(true);
       const clientSpy = {

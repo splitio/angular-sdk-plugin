@@ -42,10 +42,11 @@ export class SplitioService {
   init(settings: SplitIO.IBrowserSettings): void {
     if (this.splitio) {
       console.log('[ERROR] There is another instance of the SDK.');
+      return;
     }
     this.settings = settings;
     this.splitio = SplitFactory(settings);
-    this.splitClient = this.splitio.client()
+    this.splitClient = this.splitio.client();
     this.splitManager = this.splitio.manager();
     this.sdkInitEventObservable();
     this.splitClient.on(this.splitClient.Event.SDK_READY, () => {
@@ -85,7 +86,7 @@ export class SplitioService {
    */
   initForKeyWaitForReady(key: SplitIO.SplitKey): Observable<SplitIO.IClient> {
     const client = this.initForKey(key);
-    return this.toObservable(client, client.Event.SDK_READY, client)
+    return this.toObservable(client, client.Event.SDK_READY, client);
   }
 
   /**

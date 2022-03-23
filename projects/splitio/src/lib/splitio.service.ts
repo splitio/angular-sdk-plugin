@@ -3,7 +3,9 @@ import { SplitFactory } from "@splitsoftware/splitio-browserjs/full";
 import SplitIO, { IClient } from '@splitsoftware/splitio-browserjs/types/splitio';
 import { Observable } from 'rxjs';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class SplitioService {
 
   /**

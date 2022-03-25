@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { SplitFactory } from "@splitsoftware/splitio-browserjs/full";
 import SplitIO, { IClient } from '@splitsoftware/splitio-browserjs/types/splitio';
 import { Observable } from 'rxjs';
+import { toObservable} from './utils/utils';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +22,7 @@ export class SplitioService {
    */
   private splitManager: SplitIO.IManager
   /**
-   *
+   * Map of intialized clients
    */
   private clientsMap: Map<string, IClient> = new Map<string, IClient>();
   /**
@@ -29,9 +30,9 @@ export class SplitioService {
    */
   isSDKReady = false;
   /**
-   * Factory settings
+   * Factory config
    */
-  settings: SplitIO.IBrowserSettings
+  config: SplitIO.IBrowserSettings;
   /**
    * SDK events observables
    */
@@ -39,8 +40,35 @@ export class SplitioService {
   sdkReadyTimeOut$: Observable<string>;
   sdkReadyFromCache$: Observable<string>;
   sdkUpdate$: Observable<string>;
-
+  /**
+   * SDK constant for control treatment
+   */
+  private CONTROL = 'control';
+  /**
+   * string constant for observable to return when client exists for a key
+   */
   private INIT_CLIENT_EXISTS = 'init:clientExists';
+  /**
+   * client with methods that return default values
+   */
+  private controlClient = {
+    getTreatment: () => { return this.CONTROL },
+    getTreatmentWithConfig: () => { return { treatment: this.CONTROL, config: null } },
+    getTreatments: (splitNames: string[]) => {
+      let result = {}
+      splitNames.forEach((splitName) => {
+        result = { ...result, [splitName]: this.CONTROL };
+      })
+      return result;
+    },
+    getTreatmentsWithConfig: (splitNames: string[]) => {
+      let result = {}
+      splitNames.forEach((splitName) => {
+        result = { ...result, [splitName]: { treatment: this.CONTROL, config: null } };
+      })
+      return result;
+    },
+  }
 
   constructor() { }
 
@@ -48,69 +76,41 @@ export class SplitioService {
    * This method initializes the SDK with the required Browser APIKEY
    * and the 'key' according to the Traffic type set (ex.: an user id).
    * @function init
-   * @param {IBrowserSettings} settings Should be an object that complies with the SplitIO.IBrowserSettings.
-   * @returns {Observable<string> | undefined}
+   * @param {IBrowserSettings} config Should be an object that complies with the SplitIO.IBrowserSettings.
+   * @returns {Observable<string>}
    */
-  init(settings: SplitIO.IBrowserSettings): Observable<string> {
+  init(config: SplitIO.IBrowserSettings): Observable<string> {
     if (this.splitio) {
       console.log('[ERROR] There is another instance of the SDK.');
       return new Observable(observer => observer.error(this.INIT_CLIENT_EXISTS));
     }
-    this.settings = settings;
-    this.splitio = SplitFactory(settings);
+    this.config = config;
+    this.splitio = SplitFactory(config);
     this.splitClient = this.splitio.client();
     this.splitManager = this.splitio.manager();
     this.sdkInitEventObservable();
     this.splitClient.on(this.splitClient.Event.SDK_READY, () => {
       this.isSDKReady = true;
     });
-    this.clientsMap.set(this.settings.core.key, this.splitClient);
+    this.clientsMap.set(this.config.core.key, this.splitClient);
     return this.sdkReady$;
   }
 
   /**
    * Returns a shared client of the SDK, associated with the given key
-   * @function initForKey
+   * @function initClient
    * @param {SplitKey} key The key for the new client instance.
-   * @returns {Observable<string> | undefined} The client instance.
+   * @returns {Observable<string>} The client instance.
    */
   initClient(key: SplitIO.SplitKey): Observable<string> {
-    let client = this.clientsMap.get(key);
+    let client = this.getSDKClient(key);
     if (client) {
       console.log('[ERROR] client for key '+key+' is already initialized.');
       return new Observable(observer => observer.error(this.INIT_CLIENT_EXISTS));
     }
     client = this.splitio.client(key);
     this.clientsMap.set(key, client);
-    return this.toObservable(client, client.Event.SDK_READY, client.Event.SDK_READY);
-  }
-
-  /**
-   * Returns treatment methods for a shared client, associated with the given key
-   * @function get
-   * @param {SplitKey} key The key for the client instance.
-   * @returns Treatment methods for shared client
-   */
-  get(key: SplitIO.SplitKey) {
-    const client = this.clientsMap.get(key);
-    if (!client) {
-      console.log('[ERROR] client for key '+key+' should be initialized first.');
-      return undefined;
-    }
-    return {
-      getTreatment(splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.Treatment {
-        return client.getTreatment(splitName, attributes);
-      },
-      getTreatmentWithConfig(splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentWithConfig {
-        return client.getTreatmentWithConfig(splitName, attributes);
-      },
-      getTreatments(splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.Treatments {
-        return client.getTreatments(splitNames, attributes);
-      },
-      getTreatmentsWithConfig(splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig {
-        return client.getTreatmentsWithConfig(splitNames, attributes);
-      }
-    }
+    return toObservable(client, client.Event.SDK_READY, client.Event.SDK_READY);
   }
 
   /**
@@ -118,30 +118,10 @@ export class SplitioService {
    */
   private sdkInitEventObservable(): void {
     const client = this.splitClient;
-    this.sdkReady$ = this.toObservable(client, client.Event.SDK_READY, client.Event.SDK_READY);
-    this.sdkReadyTimeOut$ = this.toObservable(client, client.Event.SDK_READY_TIMED_OUT, client.Event.SDK_READY_TIMED_OUT);
-    this.sdkReadyFromCache$ = this.toObservable(client, client.Event.SDK_READY_FROM_CACHE, client.Event.SDK_READY_FROM_CACHE);
-    this.sdkUpdate$ = this.toObservable(client, client.Event.SDK_UPDATE, client.Event.SDK_UPDATE);
-  }
-
-  /**
-   * Private function to return as observable the event on parameter
-   * @param {string} event
-   * @param response
-   * @returns Observable<any>
-   */
-  private toObservable(client: IClient, event: string, response: any): Observable<any> {
-    let wasEventEmitted = false;
-    return new Observable(subscriber => {
-      if (wasEventEmitted) {
-        subscriber.next(response);
-      } else {
-        client.on(event, () => {
-          wasEventEmitted = true;
-          subscriber.next(response);
-        });
-      }
-    });
+    this.sdkReady$ = toObservable(client, client.Event.SDK_READY, client.Event.SDK_READY);
+    this.sdkReadyTimeOut$ = toObservable(client, client.Event.SDK_READY_TIMED_OUT, client.Event.SDK_READY_TIMED_OUT);
+    this.sdkReadyFromCache$ = toObservable(client, client.Event.SDK_READY_FROM_CACHE, client.Event.SDK_READY_FROM_CACHE);
+    this.sdkUpdate$ = toObservable(client, client.Event.SDK_UPDATE, client.Event.SDK_UPDATE);
   }
 
   /**
@@ -160,7 +140,8 @@ export class SplitioService {
    * @returns {IClient} split client.
    */
   getSDKClient(key?: SplitIO.SplitKey): SplitIO.IClient | undefined {
-    key = key ? key : this.settings.core.key;
+    if (!this.isInitialized()) return undefined;
+    key = key ? key : this.config.core.key;
     return this.clientsMap.get(key);
   }
 
@@ -173,47 +154,120 @@ export class SplitioService {
   }
 
   /**
+   * Validates key and returns client if it is initialized for key or controlClient if it isn't
+   * @param splitNames
+   * @param attributes
+   * @param key
+   * @returns
+   */
+  private getClient(key?: SplitIO.SplitKey | undefined): any {
+    const client = this.getSDKClient(key);
+    if (!client) {
+      console.log('[ERROR] client for key ' + key + ' should be initialized first.');
+      return this.controlClient;
+    }
+    return client
+  }
+
+  private parseParams(param1: string | string[] | SplitIO.SplitKey, param2?: string | string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): any{
+    if ((typeof param2 === 'string') || (param2 && (param2.constructor === Array))) return { key: param1, splitNames: param2, attributes: param3};
+    return { key: this.config.core.key, splitNames: param1, attributes: param2 };
+  }
+
+  private isInitialized(): boolean {
+    if (!this.config) {
+      console.log('[ERROR] plugin should be initialized');
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * Returns a Treatment value, which is the treatment string for the given feature.
    * @function getTreatment
-   * @param {string} splitName - The string that represents the split we wan't to get the treatment.
+   * @param {SplitKey} key - The key for the client instance.
+   * @param {string} splitName - The string that represents the split we want to get the treatment.
    * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
-   * @returns {Treatment} The treatment string.
+   * @returns {Treatment} - The treatment string.
    */
-  getTreatment(splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.Treatment {
-    return this.splitClient.getTreatment(splitName, attributes);
+  getTreatment(key: SplitIO.SplitKey, splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.Treatment
+  /**
+   * Returns a Treatment value, which is the treatment string for the given feature.
+   * @function getTreatment
+   * @param {string} splitName - The string that represents the split we want to get the treatment.
+   * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
+   * @returns {Treatment} - The treatment string.
+   */
+  getTreatment(splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.Treatment
+  getTreatment(param1: string | SplitIO.SplitKey, param2?: string | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.Treatment {
+    const parsedParams = this.parseParams(param1, param2, param3);
+    return this.getClient(parsedParams.key).getTreatment(parsedParams.splitNames, parsedParams.attributes);
   }
 
   /**
    * Returns a TreatmentWithConfig value, which is an object with both treatment and config string for the given feature.
    * @function getTreatmentWithConfig
-   * @param {string} splitName - The string that represents the split we wan't to get the treatment.
+   * @param {SplitKey} key - The key for the client instance.
+   * @param {string} splitName - The string that represents the split we want to get the treatment.
    * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
-   * @returns {TreatmentWithConfig} The map containing the treatment and the configuration stringified JSON (or null if there was no config for that treatment).
+   * @returns {TreatmentWithConfig} - The map containing the treatment and the configuration stringified JSON (or null if there was no config for that treatment).
    */
-  getTreatmentWithConfig(splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentWithConfig {
-    return this.splitClient.getTreatmentWithConfig(splitName, attributes);
+  getTreatmentWithConfig(key: SplitIO.SplitKey, splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentWithConfig
+  /**
+   * Returns a TreatmentWithConfig value, which is an object with both treatment and config string for the given feature.
+   * @function getTreatmentWithConfig
+   * @param {string} splitName - The string that represents the split we want to get the treatment.
+   * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
+   * @returns {TreatmentWithConfig} - The map containing the treatment and the configuration stringified JSON (or null if there was no config for that treatment).
+   */
+  getTreatmentWithConfig(splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentWithConfig
+  getTreatmentWithConfig(param1: string | SplitIO.SplitKey, param2?: string | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.TreatmentWithConfig {
+    const parsedParams = this.parseParams(param1, param2, param3);
+    return this.getClient(parsedParams.key).getTreatmentWithConfig(parsedParams.splitNames, parsedParams.attributes);
   }
 
   /**
    * Returns a Treatments value, which is an object map with the treatments for the given features.
    * @function getTreatments
-   * @param {Array<string>} splitNames - An array of the split names we wan't to get the treatments.
+   * @param {SplitKey} key - The key for the client instance.
+   * @param {Array<string>} splitNames - An array of the split names we want to get the treatments.
    * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
-   * @returns {Treatments} The treatments object map.
+   * @returns {Treatments} - The treatments object map.
    */
-  getTreatments(splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.Treatments {
-    return this.splitClient.getTreatments(splitNames, attributes);
+  getTreatments(key: SplitIO.SplitKey, splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.Treatments
+  /**
+   * Returns a Treatments value, which is an object map with the treatments for the given features.
+   * @function getTreatments\
+   * @param {Array<string>} splitNames - An array of the split names we want to get the treatments.
+   * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
+   * @returns {Treatments} - The treatments object map.
+   */
+  getTreatments(splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.Treatments
+  getTreatments(param1: string[] | SplitIO.SplitKey, param2?: string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.Treatments {
+    const parsedParams = this.parseParams(param1, param2, param3);
+    return this.getClient(parsedParams.key).getTreatments(parsedParams.splitNames, parsedParams.attributes);
   }
 
   /**
    * Returns a TreatmentsWithConfig value, which is an object map with the TreatmentWithConfig (an object with both treatment and config string) for the given features.
    * @function getTreatmentsWithConfig
-   * @param {Array<string>} splitNames - An array of the split names we wan't to get the treatments.
+   * @param {SplitKey} key - The key for the client instance.
+   * @param {Array<string>} splitNames - An array of the split names we want to get the treatments.
    * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {TreatmentsWithConfig} The map with all the TreatmentWithConfig objects
    */
-  getTreatmentsWithConfig(splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig {
-    return this.splitClient.getTreatmentsWithConfig(splitNames, attributes);
+  getTreatmentsWithConfig(key: SplitIO.SplitKey, splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig
+  /**
+   * Returns a TreatmentsWithConfig value, which is an object map with the TreatmentWithConfig (an object with both treatment and config string) for the given features.
+   * @function getTreatmentsWithConfig
+   * @param {Array<string>} splitNames - An array of the split names we want to get the treatments.
+   * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
+   * @returns {TreatmentsWithConfig} The map with all the TreatmentWithConfig objects
+   */
+  getTreatmentsWithConfig(splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig
+  getTreatmentsWithConfig(param1: string[] | SplitIO.SplitKey, param2?: string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig {
+    const parsedParams = this.parseParams(param1, param2, param3);
+    return this.getClient(parsedParams.key).getTreatmentsWithConfig(parsedParams.splitNames, parsedParams.attributes);
   }
 
   /**

@@ -18,7 +18,7 @@ describe('SplitioGuard', () => {
   it('splitio guard', (done) => {
     expect(guard.canActivate()).toEqual(false);
     service.init(localhostConfig);
-    service.SDKReady$.subscribe(() => {
+    service.sdkReady$.subscribe(() => {
       expect(service.isSDKReady).toEqual(true);
       expect(guard.canActivate()).toEqual(true);
       done();

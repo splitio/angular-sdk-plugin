@@ -7,15 +7,15 @@ import { Observable } from "rxjs";
  * @param response
  * @returns Observable<any>
  */
- export function toObservable(client: IClient, event: string, response: any): Observable<any> {
+ export function toObservable(client: IClient, event: string): Observable<string> {
   let wasEventEmitted = false;
   return new Observable(subscriber => {
     if (wasEventEmitted) {
-      subscriber.next(response);
+      subscriber.next(event);
     } else {
       client.on(event, () => {
         wasEventEmitted = true;
-        subscriber.next(response);
+        subscriber.next(event);
       });
     }
   });

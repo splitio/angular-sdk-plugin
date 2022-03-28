@@ -6,6 +6,8 @@ describe('SplitioService', () => {
 
   let service: SplitioService;
 
+  const logSpy = jest.spyOn(console, 'log');
+
   beforeEach(() => {
     service = new SplitioService();
   });
@@ -13,39 +15,97 @@ describe('SplitioService', () => {
   test('SDK Events TIMED OUT', (done) => {
     expect(service).toBeTruthy();
     service.init(config);
-    service.sdkReadyTimeOut$.subscribe(() => {
+    service.sdkReadyTimedOut$.subscribe(() => {
       expect(service.isSDKReady).toEqual(false);
       done();
     });
   });
 
   test('SDK Events READY / UPDATE', (done) => {
+    let calledTimes = 0;
     expect(service.isSDKReady).toEqual(false);
+
     service.init(localhostConfig);
+    const sdk = service.getSDKFactory();
+    if (!sdk) throw new Error('SDK should be initialized');
+
     service.ready().then(() => {
       expect(service.isSDKReady).toEqual(true);
     });
-    service.sdkUpdate$.subscribe(() => {
+
+    const updateSubscription = service.sdkUpdate$.subscribe(() => {
+      if (calledTimes == 3) {
+        expect(service.getTreatment('test_split')).toEqual('3');
+        updateSubscription.unsubscribe();
+        readySubscription.unsubscribe();
+        done();
+      }
       expect(service.isSDKReady).toEqual(true);
-      done();
+      calledTimes++;
+      // this callback modifies the factory features 3 times to ensure that update observable keeps emiting events
+      sdk.settings.features = { test_split: '' + calledTimes };
     });
-    service.sdkReady$.subscribe(() => {
+
+    const readySubscription = service.sdkReady$.subscribe(() => {
       expect(service.isSDKReady).toEqual(true);
 
       // subscribed again to ensure that is called even if the event was already emitted
       // and to verify that we can subscribe more than once to the observable
       service.sdkReady$.subscribe(() => {
         // this callback modifies the factory features so the update event will emit and finish this test with done function
-        service.getSDKFactory().settings.features = { test_split: 'off' };
+        sdk.settings.features = { test_split: '0' };
       });
     });
   });
+
+  test('Shared clients Events READY / UPDATE', (done) => {
+    let calledTimes = 0;
+    const key5 = 'myKey5';
+    const key6 = 'myKey6';
+
+    service.init(localhostConfig);
+    const sdk = service.getSDKFactory();
+    if (!sdk) throw new Error('SDK should be initialized');
+
+    service.initClient(key5);
+
+    const key5ClientSDKReady$ = service.getClientSDKReady(key5);
+    key5ClientSDKReady$.subscribe(() => {
+      expect(service.getSDKClient(key5)?.getTreatment('test_split')).toEqual(service.getTreatment(key5,'test_split'));
+    });
+
+    service.getClientSDKUpdate(key5).subscribe(() => {
+      if (calledTimes == 3) {
+        expect(service.getSDKClient(key5)?.getTreatment('test_split')).toEqual(service.getTreatment(key5,'test_split'));
+        expect(service.getTreatment(key5,'test_split')).toEqual('3');
+        done();
+      }
+      calledTimes++;
+      // this callback modifies the factory features 3 times to ensure that update observable keeps emiting events
+      sdk.settings.features = { test_split: '' + calledTimes };
+    });
+
+    const key6ClientSDKReady = service.initClient(key6);
+    key6ClientSDKReady.subscribe(() => {
+      expect(service.getSDKClient(key6)?.getTreatment('test_split')).toEqual(service.getTreatment(key6,'test_split'));
+    });
+
+    const key5ClientSDKReady2$ = service.getClientSDKReady(key5);
+    key5ClientSDKReady2$.subscribe(() => {
+      // subscribed again to ensure that is called even if the event was already emitted
+      // and to verify that we can subscribe more than once to the observable
+      key5ClientSDKReady2$.subscribe(() => {
+        sdk.settings.features = { test_split: '0' };
+        // this callback modifies the factory features so the update event will emit and finish this test with done function
+      });
+    });
+  });
+
 
   test('Evaluations', (done) => {
     expect(service.isSDKReady).toEqual(false);
     service.init(localhostConfig).subscribe(() => {
 
-      const logSpy = jest.spyOn(console, 'log');
       service.init(config).subscribe({
         next: () => { throw new Error('it should not reach here'); },
         error: () => {

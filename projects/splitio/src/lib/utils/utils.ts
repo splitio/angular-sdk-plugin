@@ -7,7 +7,7 @@ import { Observable } from "rxjs";
  * @param response
  * @returns Observable<any>
  */
- export function toObservable(client: IClient, event: string): Observable<string> {
+export function toObservable(client: IClient, event: string): Observable<string> {
   let wasEventEmitted = false;
   return new Observable(subscriber => {
     if (wasEventEmitted) {
@@ -19,4 +19,11 @@ import { Observable } from "rxjs";
       });
     }
   });
+}
+
+/**
+ * Checks if a given value is a string.
+ */
+export function isString(val: any): val is string {
+  return typeof val === 'string' || val instanceof String;
 }

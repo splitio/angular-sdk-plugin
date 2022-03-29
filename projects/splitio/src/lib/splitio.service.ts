@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { SplitFactory } from "@splitsoftware/splitio-browserjs/full";
 import SplitIO, { IClient } from '@splitsoftware/splitio-browserjs/types/splitio';
 import { Observable } from 'rxjs';
-import { isString, toObservable} from './utils/utils';
+import { INIT_CLIENT_EXISTS, INIT_CLIENT_FIRST } from './utils/constants';
+import { CONTROL_CLIENT, DEFAULT_MANAGER, isString, toObservable} from './utils/utils';
 
 @Injectable({
   providedIn: 'root'
@@ -40,55 +41,7 @@ export class SplitioService {
   sdkReadyTimedOut$: Observable<string>;
   sdkReadyFromCache$: Observable<string>;
   sdkUpdate$: Observable<string>;
-  /**
-   * SDK constant for control treatment
-   */
-  private CONTROL = 'control';
-  /**
-   * string constant for observable to return when client exists for a key
-   */
-  private INIT_CLIENT_EXISTS = 'init::clientExists';
-  /**
-   * string constant for observable to return when client is not initialized
-   */
-  private INIT_CLIENT_FIRST = 'init::clientFirst';
-  /**
-   * client with methods that return default values
-   */
-  private controlClient = {
-    getTreatment: () => { return this.CONTROL },
-    getTreatmentWithConfig: () => { return { treatment: this.CONTROL, config: null } },
-    getTreatments: (splitNames: string[]) => {
-      let result = {}
-      splitNames.forEach((splitName) => {
-        result = { ...result, [splitName]: this.CONTROL };
-      })
-      return result;
-    },
-    getTreatmentsWithConfig: (splitNames: string[]) => {
-      let result = {}
-      splitNames.forEach((splitName) => {
-        result = { ...result, [splitName]: { treatment: this.CONTROL, config: null } };
-      })
-      return result;
-    },
-    on: () => {},
-    track: () => {return false},
-    Event: {
-      SDK_READY: 'init::ready',
-      SDK_READY_FROM_CACHE: 'init::cache-ready',
-      SDK_READY_TIMED_OUT: 'init::timeout',
-      SDK_UPDATE: 'state::update'
-    }
-  }
-  /**
-   * client with methods that return default values
-   */
-  private defaultManager = {
-    splits: () => { return [] },
-    split: () => { return null },
-    names: () => { return [] }
-  }
+
 
   constructor() { }
 
@@ -102,7 +55,7 @@ export class SplitioService {
   init(config: SplitIO.IBrowserSettings): Observable<string> {
     if (this.splitio) {
       console.log('[ERROR] There is another instance of the SDK.');
-      return new Observable(observer => observer.error(this.INIT_CLIENT_EXISTS));
+      return new Observable(observer => observer.error(INIT_CLIENT_EXISTS));
     }
     this.config = config;
     this.splitio = SplitFactory(config);
@@ -126,7 +79,7 @@ export class SplitioService {
     let client = this.getSDKClient(key);
     if (client) {
       console.log('[ERROR] client for key ' + key + ' is already initialized.');
-      return new Observable(observer => observer.error(this.INIT_CLIENT_EXISTS));
+      return new Observable(observer => observer.error(INIT_CLIENT_EXISTS));
     }
     client = this.splitio.client(key);
     this.clientsMap.set(key, client);
@@ -137,7 +90,7 @@ export class SplitioService {
     const client = this.getClient(key);
     if (!client) {
       console.log('[ERROR] client' + (key ? ' for key ' + key : '') + ' should be initialized first.');
-      return new Observable(observer => observer.error(this.INIT_CLIENT_FIRST));
+      return new Observable(observer => observer.error(INIT_CLIENT_FIRST));
     }
     return toObservable(client, client.Event[event])
   }
@@ -238,13 +191,13 @@ export class SplitioService {
     const client = this.getSDKClient(key);
     if (!client) {
       console.log('[ERROR] client' + (key ? ' for key ' + key : '') + ' should be initialized first.');
-      return this.controlClient;
+      return CONTROL_CLIENT;
     }
     return client
   }
 
   private parseTreatmentParams(param1: string | string[] | SplitIO.SplitKey, param2?: string | string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): any {
-    if ((typeof param2 === 'string') || (param2 && (param2.constructor === Array))) return { key: param1, splitNames: param2, attributes: param3};
+    if (isString(param2) || Array.isArray(param2)) return { key: param1, splitNames: param2, attributes: param3};
     return { key: undefined, splitNames: param1, attributes: param2 };
   }
 
@@ -266,8 +219,8 @@ export class SplitioService {
    */
   getTreatment(splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.Treatment
   getTreatment(param1: string | SplitIO.SplitKey, param2?: string | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.Treatment {
-    const parsedParams = this.parseTreatmentParams(param1, param2, param3);
-    return this.getClient(parsedParams.key).getTreatment(parsedParams.splitNames, parsedParams.attributes);
+    const {key, splitNames, attributes} = this.parseTreatmentParams(param1, param2, param3);
+    return this.getClient(key).getTreatment(splitNames, attributes);
   }
 
   /**
@@ -288,8 +241,8 @@ export class SplitioService {
    */
   getTreatmentWithConfig(splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentWithConfig
   getTreatmentWithConfig(param1: string | SplitIO.SplitKey, param2?: string | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.TreatmentWithConfig {
-    const parsedParams = this.parseTreatmentParams(param1, param2, param3);
-    return this.getClient(parsedParams.key).getTreatmentWithConfig(parsedParams.splitNames, parsedParams.attributes);
+    const {key, splitNames, attributes} = this.parseTreatmentParams(param1, param2, param3);
+    return this.getClient(key).getTreatmentWithConfig(splitNames, attributes);
   }
 
   /**
@@ -310,8 +263,8 @@ export class SplitioService {
    */
   getTreatments(splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.Treatments
   getTreatments(param1: string[] | SplitIO.SplitKey, param2?: string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.Treatments {
-    const parsedParams = this.parseTreatmentParams(param1, param2, param3);
-    return this.getClient(parsedParams.key).getTreatments(parsedParams.splitNames, parsedParams.attributes);
+    const {key, splitNames, attributes} = this.parseTreatmentParams(param1, param2, param3);
+    return this.getClient(key).getTreatments(splitNames, attributes);
   }
 
   /**
@@ -332,8 +285,8 @@ export class SplitioService {
    */
   getTreatmentsWithConfig(splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig
   getTreatmentsWithConfig(param1: string[] | SplitIO.SplitKey, param2?: string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig {
-    const parsedParams = this.parseTreatmentParams(param1, param2, param3);
-    return this.getClient(parsedParams.key).getTreatmentsWithConfig(parsedParams.splitNames, parsedParams.attributes);
+    const {key, splitNames, attributes} = this.parseTreatmentParams(param1, param2, param3);
+    return this.getClient(key).getTreatmentsWithConfig(splitNames, attributes);
   }
 
   private parseTrackParams(param1: string | SplitIO.SplitKey, param2: string, param3: number | string | undefined, param4: number | SplitIO.Properties | undefined, param5: SplitIO.Properties | undefined): any {
@@ -374,7 +327,7 @@ export class SplitioService {
     const client = this.getSDKClient();
     if (!client) {
       console.log('[ERROR] The SDK has not being initialized. Returning default response for method call.');
-      return this.defaultManager;
+      return DEFAULT_MANAGER;
     }
     return this.splitManager
   }

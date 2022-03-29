@@ -316,8 +316,8 @@ export class SplitioService {
    */
   track(trafficType: string, eventType: string, value?: number | undefined, properties?: SplitIO.Properties | undefined): boolean
   track(param1: string | SplitIO.SplitKey, param2: string, param3?: string | number | undefined, param4?: number | SplitIO.Properties | undefined, param5?: SplitIO.Properties | undefined): boolean {
-    const parsedParams = this.parseTrackParams(param1, param2, param3, param4, param5);
-    return this.getClient(parsedParams.key).track(parsedParams.trafficType, parsedParams.eventType, parsedParams.value, parsedParams.properties);
+    const {key, trafficType, eventType, value, properties} = this.parseTrackParams(param1, param2, param3, param4, param5);
+    return this.getClient(key).track(trafficType, eventType, value, properties);
   }
 
   /**

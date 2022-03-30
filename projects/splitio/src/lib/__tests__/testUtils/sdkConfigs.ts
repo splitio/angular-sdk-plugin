@@ -7,7 +7,10 @@ export const localhostConfig: SplitIO.IBrowserSettings = {
   },
   features: {
     test_split: 'on',
-    test_split2: 'off'
+    test_split2: {
+      treatment: 'off',
+      config: '{"bannerText":"Click here."}'
+    }
   },
   scheduler: {
     offlineRefreshRate: 0.1

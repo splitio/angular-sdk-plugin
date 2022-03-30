@@ -10,7 +10,9 @@ export const mockedSplitView = [
   },
   {
     "changeNumber": 0,
-    "configs": {},
+    "configs": {
+      "off": '{"bannerText":"Click here."}'
+    },
     "killed": false,
     "name":
     "test_split2",

@@ -67,6 +67,13 @@ describe('SplitioService', () => {
     const sdk = service.getSDKFactory();
     if (!sdk) throw new Error('SDK should be initialized');
 
+    service.getClientSDKReady(key5).subscribe({
+      next: () => { throw new Error('it should not reach here'); },
+      error: () => {
+        expect(logSpy).toHaveBeenCalledWith('[ERROR] client for key ' + key5 + ' should be initialized first.');
+      }
+    })
+
     service.initClient(key5);
 
     const key5ClientSDKReady$ = service.getClientSDKReady(key5);
@@ -75,6 +82,12 @@ describe('SplitioService', () => {
     });
 
     service.getClientSDKUpdate(key5).subscribe(() => {
+      if (calledTimes == 2) {
+        service.getClientSDKUpdate(key5).subscribe(() => {
+          expect(service.getSDKClient(key5)?.getTreatment('test_split')).toEqual(service.getTreatment(key5,'test_split'));
+          expect(service.getTreatment(key5,'test_split')).toEqual('3');
+        });
+      }
       if (calledTimes == 3) {
         expect(service.getSDKClient(key5)?.getTreatment('test_split')).toEqual(service.getTreatment(key5,'test_split'));
         expect(service.getTreatment(key5,'test_split')).toEqual('3');

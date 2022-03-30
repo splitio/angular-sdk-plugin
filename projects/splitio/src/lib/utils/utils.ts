@@ -8,18 +8,26 @@ import { CONTROL } from "./constants";
  * @param response
  * @returns Observable<any>
  */
- export function toObservable(client: IClient, event: string): Observable<string> {
-  let wasEventEmitted = false;
-  return new Observable(subscriber => {
-    if (wasEventEmitted) {
-      subscriber.next(event);
-    } else {
+ export function toObservable(client: IClient, event: string, isOneTimeEvent = true): Observable<string> {
+  if (isOneTimeEvent) {
+    let wasEventEmitted = false;
+    return new Observable(subscriber => {
+      if (wasEventEmitted) {
+        subscriber.next(event);
+      } else {
+        client.once(event, () => {
+          wasEventEmitted = true;
+          subscriber.next(event);
+        });
+      }
+    });
+  } else {
+    return new Observable(subscriber => {
       client.on(event, () => {
-        wasEventEmitted = true;
         subscriber.next(event);
       });
-    }
-  });
+    });
+  }
 }
 
 export function isString(val: any): val is string {
@@ -45,12 +53,5 @@ export const CONTROL_CLIENT = {
       result = { ...result, [splitName]: { treatment: CONTROL, config: null } };
     })
     return result;
-  },
-  on: () => {},
-  Event: {
-    SDK_READY: 'init::ready',
-    SDK_READY_FROM_CACHE: 'init::cache-ready',
-    SDK_READY_TIMED_OUT: 'init::timeout',
-    SDK_UPDATE: 'state::update'
   }
 }

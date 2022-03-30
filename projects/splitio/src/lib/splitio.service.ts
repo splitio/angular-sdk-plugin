@@ -94,13 +94,12 @@ export class SplitioService {
     return toObservable(client, client.Event.SDK_READY);
   }
 
-  private getClientObservable(key: SplitIO.SplitKey, event: string): Observable<string> {
+  private getClientObservable(key: SplitIO.SplitKey, event: string, isOneTimeEvent = true): Observable<string> {
     const client = this.getClient(key);
-    if (!client) {
-      console.log('[ERROR] client for key ' + key + ' should be initialized first.');
+    if (client === CONTROL_CLIENT) {
       return new Observable(observer => observer.error(INIT_CLIENT_FIRST));
     }
-    return toObservable(client, client.Event[event])
+    return toObservable(client, client.Event[event], isOneTimeEvent);
   }
 
   /**
@@ -110,7 +109,7 @@ export class SplitioService {
    * @returns {Observable<string>}
    */
   getClientSDKReady(key: SplitIO.SplitKey): Observable<string> {
-    return this.getClientObservable(key, 'SDK_READY')
+    return this.getClientObservable(key, 'SDK_READY');
   }
 
   /**
@@ -120,7 +119,7 @@ export class SplitioService {
    * @returns {Observable<string>}
    */
   getClientSDKReadyTimedOut(key: SplitIO.SplitKey): Observable<string> {
-    return this.getClientObservable(key, 'SDK_READY_TIMED_OUT')
+    return this.getClientObservable(key, 'SDK_READY_TIMED_OUT');
   }
 
   /**
@@ -130,7 +129,7 @@ export class SplitioService {
    * @returns {Observable<string>}
    */
   getClientSDKReadyFromCache(key: SplitIO.SplitKey): Observable<string> {
-    return this.getClientObservable(key, 'SDK_READY_FROM_CACHE')
+    return this.getClientObservable(key, 'SDK_READY_FROM_CACHE');
   }
 
   /**
@@ -140,7 +139,7 @@ export class SplitioService {
    * @returns {Observable<string>}
    */
   getClientSDKUpdate(key: SplitIO.SplitKey): Observable<string> {
-    return this.getClientObservable(key, 'SDK_UPDATE')
+    return this.getClientObservable(key, 'SDK_UPDATE', false);
   }
 
   /**
@@ -151,7 +150,7 @@ export class SplitioService {
     this.sdkReady$ = toObservable(client, client.Event.SDK_READY);
     this.sdkReadyTimedOut$ = toObservable(client, client.Event.SDK_READY_TIMED_OUT);
     this.sdkReadyFromCache$ = toObservable(client, client.Event.SDK_READY_FROM_CACHE);
-    this.sdkUpdate$ = toObservable(client, client.Event.SDK_UPDATE);
+    this.sdkUpdate$ = toObservable(client, client.Event.SDK_UPDATE, false);
   }
 
   /**

@@ -3,7 +3,7 @@ import { SplitFactory } from "@splitsoftware/splitio-browserjs/full";
 import SplitIO, { IClient } from '@splitsoftware/splitio-browserjs/types/splitio';
 import { Observable } from 'rxjs';
 import { INIT_CLIENT_EXISTS, INIT_CLIENT_FIRST } from './utils/constants';
-import { CONTROL_CLIENT, isString, toObservable} from './utils/utils';
+import { CONTROL_CLIENT, DEFAULT_MANAGER, isString, toObservable} from './utils/utils';
 
 @Injectable({
   providedIn: 'root'
@@ -42,14 +42,6 @@ export class SplitioService {
   sdkReadyFromCache$: Observable<string>;
   sdkUpdate$: Observable<string>;
 
-  /**
-   * client with methods that return default values
-   */
-  private defaultManager = {
-    splits: () => { return [] },
-    split: () => { return null },
-    names: () => { return [] }
-  }
 
   constructor() { }
 
@@ -173,7 +165,7 @@ export class SplitioService {
 
   /**
    * Returns the SDK client
-   * @param {SplitKey} key The key for the client instance.
+   * @param {SplitKey=} key The key for the client instance.
    * @returns {IClient} split client.
    */
   getSDKClient(key?: SplitIO.SplitKey): SplitIO.IClient | undefined {
@@ -197,15 +189,15 @@ export class SplitioService {
   private getClient(key?: SplitIO.SplitKey | undefined): any {
     const client = this.getSDKClient(key);
     if (!client) {
-      console.log('[ERROR] client for key ' + key + ' should be initialized first.');
+      console.log('[ERROR] client' + (key ? ' for key ' + key : '') + ' should be initialized first.');
       return CONTROL_CLIENT;
     }
     return client
   }
 
-  private parseParams(param1: string | string[] | SplitIO.SplitKey, param2?: string | string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): any{
+  private parseTreatmentParams(param1: string | string[] | SplitIO.SplitKey, param2?: string | string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): any {
     if (isString(param2) || Array.isArray(param2)) return { key: param1, splitNames: param2, attributes: param3};
-    return { key: this.config.core.key, splitNames: param1, attributes: param2 };
+    return { key: undefined, splitNames: param1, attributes: param2 };
   }
 
   /**
@@ -213,7 +205,7 @@ export class SplitioService {
    * @function getTreatment
    * @param {SplitKey} key - The key for the client instance.
    * @param {string} splitName - The string that represents the split we want to get the treatment.
-   * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
+   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {Treatment} - The treatment string.
    */
   getTreatment(key: SplitIO.SplitKey, splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.Treatment
@@ -221,12 +213,12 @@ export class SplitioService {
    * Returns a Treatment value, which is the treatment string for the given feature.
    * @function getTreatment
    * @param {string} splitName - The string that represents the split we want to get the treatment.
-   * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
+   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {Treatment} - The treatment string.
    */
   getTreatment(splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.Treatment
   getTreatment(param1: string | SplitIO.SplitKey, param2?: string | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.Treatment {
-    const {key, splitNames, attributes} = this.parseParams(param1, param2, param3);
+    const {key, splitNames, attributes} = this.parseTreatmentParams(param1, param2, param3);
     return this.getClient(key).getTreatment(splitNames, attributes);
   }
 
@@ -248,7 +240,7 @@ export class SplitioService {
    */
   getTreatmentWithConfig(splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentWithConfig
   getTreatmentWithConfig(param1: string | SplitIO.SplitKey, param2?: string | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.TreatmentWithConfig {
-    const {key, splitNames, attributes} = this.parseParams(param1, param2, param3);
+    const {key, splitNames, attributes} = this.parseTreatmentParams(param1, param2, param3);
     return this.getClient(key).getTreatmentWithConfig(splitNames, attributes);
   }
 
@@ -257,7 +249,7 @@ export class SplitioService {
    * @function getTreatments
    * @param {SplitKey} key - The key for the client instance.
    * @param {Array<string>} splitNames - An array of the split names we want to get the treatments.
-   * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
+   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {Treatments} - The treatments object map.
    */
   getTreatments(key: SplitIO.SplitKey, splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.Treatments
@@ -265,12 +257,12 @@ export class SplitioService {
    * Returns a Treatments value, which is an object map with the treatments for the given features.
    * @function getTreatments\
    * @param {Array<string>} splitNames - An array of the split names we want to get the treatments.
-   * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
+   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {Treatments} - The treatments object map.
    */
   getTreatments(splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.Treatments
   getTreatments(param1: string[] | SplitIO.SplitKey, param2?: string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.Treatments {
-    const {key, splitNames, attributes} = this.parseParams(param1, param2, param3);
+    const {key, splitNames, attributes} = this.parseTreatmentParams(param1, param2, param3);
     return this.getClient(key).getTreatments(splitNames, attributes);
   }
 
@@ -279,7 +271,7 @@ export class SplitioService {
    * @function getTreatmentsWithConfig
    * @param {SplitKey} key - The key for the client instance.
    * @param {Array<string>} splitNames - An array of the split names we want to get the treatments.
-   * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
+   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {TreatmentsWithConfig} The map with all the TreatmentWithConfig objects
    */
   getTreatmentsWithConfig(key: SplitIO.SplitKey, splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig
@@ -287,13 +279,44 @@ export class SplitioService {
    * Returns a TreatmentsWithConfig value, which is an object map with the TreatmentWithConfig (an object with both treatment and config string) for the given features.
    * @function getTreatmentsWithConfig
    * @param {Array<string>} splitNames - An array of the split names we want to get the treatments.
-   * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
+   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {TreatmentsWithConfig} The map with all the TreatmentWithConfig objects
    */
   getTreatmentsWithConfig(splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig
   getTreatmentsWithConfig(param1: string[] | SplitIO.SplitKey, param2?: string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig {
-    const {key, splitNames, attributes} = this.parseParams(param1, param2, param3);
+    const {key, splitNames, attributes} = this.parseTreatmentParams(param1, param2, param3);
     return this.getClient(key).getTreatmentsWithConfig(splitNames, attributes);
+  }
+
+  private parseTrackParams(param1: string | SplitIO.SplitKey, param2: string, param3: number | string | undefined, param4: number | SplitIO.Properties | undefined, param5: SplitIO.Properties | undefined): any {
+    if (isString(param3)) return { key: param1, trafficType: param2, eventType: param3, value: param4, properties: param5};
+    return { key: undefined, trafficType: param1, eventType: param2, value: param3, properties: param4 };
+  }
+
+  /**
+   * Tracks an event for a shared client to be fed to the results product on Split Webconsole and returns a promise to signal when the event was successfully queued (or not).
+   * @function track
+   * @param {SplitKey} key - The key that identifies the entity related to this event.
+   * @param {string} trafficType - The traffic type of the entity related to this event.
+   * @param {string} eventType - The event type corresponding to this event.
+   * @param {number=} value - The value of this event.
+   * @param {Properties=} properties - The properties of this event. Values can be string, number, boolean or null.
+   * @returns {Promise<boolean>} A promise that resolves to a boolean indicating if the event was added to the queue successfully or not.
+   */
+  track(key: SplitIO.SplitKey, trafficType: string, eventType: string, value?: number | undefined, properties?: SplitIO.Properties | undefined): boolean
+  /**
+   * Tracks an event to be fed to the results product on Split Webconsole and returns a promise to signal when the event was successfully queued (or not).
+   * @function track
+   * @param {string} trafficType - The traffic type of the entity related to this event.
+   * @param {string} eventType - The event type corresponding to this event.
+   * @param {number=} value - The value of this event.
+   * @param {Properties=} properties - The properties of this event. Values can be string, number, boolean or null.
+   * @returns {Promise<boolean>} A promise that resolves to a boolean indicating if the event was added to the queue successfully or not.
+   */
+  track(trafficType: string, eventType: string, value?: number | undefined, properties?: SplitIO.Properties | undefined): boolean
+  track(param1: string | SplitIO.SplitKey, param2: string, param3?: string | number | undefined, param4?: number | SplitIO.Properties | undefined, param5?: SplitIO.Properties | undefined): boolean {
+    const {key, trafficType, eventType, value, properties} = this.parseTrackParams(param1, param2, param3, param4, param5);
+    return this.getClient(key).track(trafficType, eventType, value, properties);
   }
 
   /**
@@ -303,7 +326,7 @@ export class SplitioService {
     const client = this.getSDKClient();
     if (!client) {
       console.log('[ERROR] The SDK has not being initialized. Returning default response for method call.');
-      return this.defaultManager;
+      return DEFAULT_MANAGER;
     }
     return this.splitManager
   }

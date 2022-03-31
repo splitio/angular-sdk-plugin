@@ -7,9 +7,12 @@ describe('SplitioService', () => {
   let service: SplitioService;
 
   const logSpy = jest.spyOn(console, 'log');
+  let logCalls = 0;
 
   beforeEach(() => {
     service = new SplitioService();
+    logSpy.mockReset();
+    logCalls = 0;
   });
 
   test('SDK Events TIMED OUT', (done) => {
@@ -122,7 +125,7 @@ describe('SplitioService', () => {
       service.init(config).subscribe({
         next: () => { throw new Error('it should not reach here'); },
         error: () => {
-          expect(logSpy).toHaveBeenCalledWith('[ERROR] There is another instance of the SDK.');
+          expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] There is another instance of the SDK.');
           expect(service.config).toEqual(localhostConfig);
         }
       });
@@ -139,13 +142,13 @@ describe('SplitioService', () => {
       };
 
       service.getTreatment('test_split');
-      expect(clientSpy.getTreatment).toHaveBeenCalledWith('test_split', undefined);
+      expect(clientSpy.getTreatment.mock.calls[0]).toEqual(['test_split', undefined]);
       service.getTreatmentWithConfig('test_split', {attr: true});
-      expect(clientSpy.getTreatmentWithConfig).toHaveBeenCalledWith('test_split', {attr: true});
+      expect(clientSpy.getTreatmentWithConfig.mock.calls[0]).toEqual(['test_split', {attr: true}]);
       service.getTreatments(['test_split','test_split2'], {attr: true});
-      expect(clientSpy.getTreatments).toHaveBeenCalledWith(['test_split','test_split2'], {attr: true});
+      expect(clientSpy.getTreatments.mock.calls[0]).toEqual([['test_split','test_split2'], {attr: true}]);
       service.getTreatmentsWithConfig(['test_split','test_split2']);
-      expect(clientSpy.getTreatmentsWithConfig).toHaveBeenCalledWith(['test_split','test_split2'], undefined);
+      expect(clientSpy.getTreatmentsWithConfig.mock.calls[0]).toEqual([['test_split','test_split2'], undefined]);
 
       const sharedClientKey = 'myKey2';
       // initialize shared client and wait for ready
@@ -163,18 +166,18 @@ describe('SplitioService', () => {
         service.initClient(sharedClientKey).subscribe({
           next: () => { throw new Error('it should not reach here'); },
           error: () => {
-            expect(logSpy).toHaveBeenCalledWith('[ERROR] client for key ' + sharedClientKey + ' is already initialized.');
+            expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key ' + sharedClientKey + ' is already initialized.');
           }
         });
 
         // Plugin should use control client for nonExistents keys
         const nonexistentKey = 'myKey3';
         expect(service.getTreatment(nonexistentKey, 'test_split')).toEqual('control');
-        expect(logSpy).toHaveBeenCalledWith('[ERROR] client for key ' + nonexistentKey + ' should be initialized first.');
+        expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key ' + nonexistentKey + ' should be initialized first.');
         expect(sharedClientSpy.getTreatment).toHaveBeenCalledTimes(0);
 
         expect(service.getTreatmentWithConfig(nonexistentKey, 'test_split')).toEqual({ treatment: 'control', config: null });
-        expect(logSpy).toHaveBeenCalledWith('[ERROR] client for key ' + nonexistentKey + ' should be initialized first.');
+        expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key ' + nonexistentKey + ' should be initialized first.');
         expect(sharedClientSpy.getTreatment).toHaveBeenCalledTimes(0);
 
         expect(service.getTreatments(nonexistentKey, ['test_split', 'test_split2']))
@@ -182,7 +185,7 @@ describe('SplitioService', () => {
           test_split: 'control',
           test_split2: 'control'
         });
-        expect(logSpy).toHaveBeenCalledWith('[ERROR] client for key ' + nonexistentKey + ' should be initialized first.');
+        expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key ' + nonexistentKey + ' should be initialized first.');
         expect(sharedClientSpy.getTreatmentWithConfig).toHaveBeenCalledTimes(0);
 
         expect(service.getTreatmentsWithConfig(nonexistentKey, ['test_split', 'test_split2']))
@@ -190,16 +193,16 @@ describe('SplitioService', () => {
           test_split: { treatment: 'control', config: null },
           test_split2: { treatment: 'control', config: null }
         });
-        expect(logSpy).toHaveBeenCalledWith('[ERROR] client for key ' + nonexistentKey + ' should be initialized first.');
+        expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key ' + nonexistentKey + ' should be initialized first.');
         expect(sharedClientSpy.getTreatmentsWithConfig).toHaveBeenCalledTimes(0);
 
         // verify that main client is not evaluating when evaluates for shared client
         expect(service.getTreatment(sharedClientKey, 'test_split', {attr: true})).toEqual('on');
-        expect(sharedClientSpy.getTreatment).toHaveBeenCalledWith('test_split', {attr: true});
+        expect(sharedClientSpy.getTreatment.mock.calls[0]).toEqual(['test_split', {attr: true}]);
         expect(clientSpy.getTreatment).toHaveBeenCalledTimes(1);
 
         expect(service.getTreatmentWithConfig(sharedClientKey, 'test_split', {attr: true})).toEqual({treatment: 'on', config: null});
-        expect(sharedClientSpy.getTreatmentWithConfig).toHaveBeenCalledWith('test_split', {attr: true});
+        expect(sharedClientSpy.getTreatmentWithConfig.mock.calls[0]).toEqual(['test_split', {attr: true}]);
         expect(clientSpy.getTreatmentWithConfig).toHaveBeenCalledTimes(1);
 
         expect(service.getTreatments(sharedClientKey, ['test_split','test_split2'], {attr: true}))
@@ -207,7 +210,7 @@ describe('SplitioService', () => {
           'test_split': 'on',
           'test_split2': 'off'
         });
-        expect(sharedClientSpy.getTreatments).toHaveBeenCalledWith(['test_split','test_split2'], {attr: true});
+        expect(sharedClientSpy.getTreatments.mock.calls[0]).toEqual([['test_split','test_split2'], {attr: true}]);
         expect(clientSpy.getTreatments).toHaveBeenCalledTimes(1);
 
         expect(service.getTreatmentsWithConfig(sharedClientKey, ['test_split','test_split2'], {attr: true}))
@@ -215,7 +218,7 @@ describe('SplitioService', () => {
           test_split: { treatment: 'on', config: null },
           test_split2: { treatment: 'off', config: '{"bannerText":"Click here."}' }
         });
-        expect(sharedClientSpy.getTreatmentsWithConfig).toHaveBeenCalledWith(['test_split','test_split2'], {attr: true});
+        expect(sharedClientSpy.getTreatmentsWithConfig.mock.calls[0]).toEqual([['test_split','test_split2'], {attr: true}]);
         expect(clientSpy.getTreatmentsWithConfig).toHaveBeenCalledTimes(1);
 
         // input validation
@@ -245,6 +248,68 @@ describe('SplitioService', () => {
       expect(service.getSplit('test_split2')).toEqual(mockedSplitView[1]);
       expect(service.getSplit('nonexistent_split')).toBeNull();
       done();
+    });
+  });
+
+  test('Track', (done) => {
+    const trackKey = 'trackKey'
+
+    expect(service.track('user', 'submit')).toEqual(false);
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] plugin should be initialized');
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client should be initialized first.');
+
+    service.init(localhostConfig).subscribe(() => {
+
+      expect(service.track(trackKey, 'user', 'submit')).toEqual(false);
+      expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key ' + trackKey + ' should be initialized first.');
+
+      service.initClient(trackKey).subscribe(() => {
+
+        const mainClient = service.getSDKClient();
+        const sharedClient = service.getSDKClient(trackKey);
+
+        if (!mainClient) throw new Error('client should exists');
+        const mainClientSpy = {
+          track: jest.spyOn(mainClient, 'track')
+        };
+
+        if (!sharedClient) throw new Error('client should exists');
+        const sharedClientSpy = {
+          track: jest.spyOn(sharedClient, 'track')
+        };
+
+        expect(service.track('user', 'click', 5, {country: 'ARG'})).toEqual(true);
+        expect(mainClientSpy.track.mock.calls[0]).toEqual(['user', 'click', 5, {country: 'ARG'}]);
+        expect(sharedClientSpy.track).toHaveBeenCalledTimes(0);
+
+        expect(service.track('user', 'click')).toEqual(true);
+        expect(mainClientSpy.track.mock.calls[1]).toEqual(['user', 'click', undefined, undefined]);
+        expect(sharedClientSpy.track).toHaveBeenCalledTimes(0);
+
+        expect(service.track(trackKey, 'user', 'click', 6)).toEqual(true);
+        expect(sharedClientSpy.track.mock.calls[0]).toEqual(['user', 'click', 6, undefined]);
+        expect(mainClientSpy.track).toHaveBeenCalledTimes(2);
+
+        expect(service.track(trackKey, 'user', 'click', undefined, {country: 'ARG'})).toEqual(true);
+        expect(sharedClientSpy.track.mock.calls[1]).toEqual(['user', 'click', undefined, {country: 'ARG'}]);
+        expect(mainClientSpy.track).toHaveBeenCalledTimes(2);
+
+        expect(service.track(trackKey, 'user', 'click', undefined, undefined)).toEqual(true);
+        expect(sharedClientSpy.track.mock.calls[2]).toEqual(['user', 'click', undefined, undefined]);
+        expect(mainClientSpy.track).toHaveBeenCalledTimes(2);
+
+        // @ts-ignore
+        expect(service.track(trackKey, 'user', 'click', 'something', undefined)).toEqual(false);
+        expect(sharedClientSpy.track).toHaveBeenCalledTimes(4);
+        expect(mainClientSpy.track).toHaveBeenCalledTimes(2);
+
+        // @ts-ignore
+        expect(service.track('user', 'click', 'something', undefined)).toEqual(false);
+        expect(sharedClientSpy.track).toHaveBeenCalledTimes(4);
+        expect(mainClientSpy.track).toHaveBeenCalledTimes(2);
+
+        done();
+      })
     });
   });
 });

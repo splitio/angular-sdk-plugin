@@ -53,5 +53,15 @@ export const CONTROL_CLIENT = {
       result = { ...result, [splitName]: { treatment: CONTROL, config: null } };
     })
     return result;
-  }
+  },
+  track: () => {return false}
+}
+
+/**
+ *  with methods that return default values
+ */
+export const DEFAULT_MANAGER = {
+  splits: () => { return [] },
+  split: () => { return null },
+  names: () => { return [] }
 }

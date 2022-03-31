@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { SplitFactory } from "@splitsoftware/splitio-browserjs/full";
 import SplitIO, { IClient } from '@splitsoftware/splitio-browserjs/types/splitio';
 import { Observable } from 'rxjs';
-import { INIT_CLIENT_EXISTS } from './utils/constants';
+import { INIT_CLIENT_EXISTS, INIT_CLIENT_FIRST } from './utils/constants';
 import { CONTROL_CLIENT, isString, toObservable} from './utils/utils';
 
 @Injectable({
@@ -38,9 +38,18 @@ export class SplitioService {
    * SDK events observables
    */
   sdkReady$: Observable<string>;
-  sdkReadyTimeOut$: Observable<string>;
+  sdkReadyTimedOut$: Observable<string>;
   sdkReadyFromCache$: Observable<string>;
   sdkUpdate$: Observable<string>;
+
+  /**
+   * client with methods that return default values
+   */
+  private defaultManager = {
+    splits: () => { return [] },
+    split: () => { return null },
+    names: () => { return [] }
+  }
 
   constructor() { }
 
@@ -49,7 +58,7 @@ export class SplitioService {
    * and the 'key' according to the Traffic type set (ex.: an user id).
    * @function init
    * @param {IBrowserSettings} config Should be an object that complies with the SplitIO.IBrowserSettings.
-   * @returns {Observable<string>}
+   * @returns {Observable<string>} Returns when sdk is ready
    */
   init(config: SplitIO.IBrowserSettings): Observable<string> {
     if (this.splitio) {
@@ -72,17 +81,65 @@ export class SplitioService {
    * Returns a shared client of the SDK, associated with the given key
    * @function initClient
    * @param {SplitKey} key The key for the new client instance.
-   * @returns {Observable<string>} The client instance.
+   * @returns {Observable<string>} Returns when sdk is ready
    */
   initClient(key: SplitIO.SplitKey): Observable<string> {
     let client = this.getSDKClient(key);
     if (client) {
-      console.log('[ERROR] client for key '+key+' is already initialized.');
+      console.log('[ERROR] client for key ' + key + ' is already initialized.');
       return new Observable(observer => observer.error(INIT_CLIENT_EXISTS));
     }
     client = this.splitio.client(key);
     this.clientsMap.set(key, client);
-    return toObservable(client, client.Event.SDK_READY, client.Event.SDK_READY);
+    return toObservable(client, client.Event.SDK_READY);
+  }
+
+  private getClientObservable(key: SplitIO.SplitKey, event: string, isOneTimeEvent = true): Observable<string> {
+    const client = this.getClient(key);
+    if (client === CONTROL_CLIENT) {
+      return new Observable(observer => observer.error(INIT_CLIENT_FIRST));
+    }
+    return toObservable(client, client.Event[event], isOneTimeEvent);
+  }
+
+  /**
+   * Returns an observable that calls back when the client is ready
+   * @function getClientSDKReady
+   * @param {SplitKey} key The key for the client instance.
+   * @returns {Observable<string>}
+   */
+  getClientSDKReady(key: SplitIO.SplitKey): Observable<string> {
+    return this.getClientObservable(key, 'SDK_READY');
+  }
+
+  /**
+   * Returns an observable that calls back when the client ready event is timed out
+   * @function getClientSDKReadyTimedOut
+   * @param {SplitKey} key The key for the client instance.
+   * @returns {Observable<string>}
+   */
+  getClientSDKReadyTimedOut(key: SplitIO.SplitKey): Observable<string> {
+    return this.getClientObservable(key, 'SDK_READY_TIMED_OUT');
+  }
+
+  /**
+   * Returns an observable that calls back when the client is ready from cache
+   * @function getClientSDKReadyFromCache
+   * @param {SplitKey} key The key for the client instance.
+   * @returns {Observable<string>}
+   */
+  getClientSDKReadyFromCache(key: SplitIO.SplitKey): Observable<string> {
+    return this.getClientObservable(key, 'SDK_READY_FROM_CACHE');
+  }
+
+  /**
+   * Returns an observable that calls back when the client is updated
+   * @function getClientSDKUpdate
+   * @param {SplitKey} key The key for the client instance.
+   * @returns {Observable<string>}
+   */
+  getClientSDKUpdate(key: SplitIO.SplitKey): Observable<string> {
+    return this.getClientObservable(key, 'SDK_UPDATE', false);
   }
 
   /**
@@ -90,10 +147,10 @@ export class SplitioService {
    */
   private sdkInitEventObservable(): void {
     const client = this.splitClient;
-    this.sdkReady$ = toObservable(client, client.Event.SDK_READY, client.Event.SDK_READY);
-    this.sdkReadyTimeOut$ = toObservable(client, client.Event.SDK_READY_TIMED_OUT, client.Event.SDK_READY_TIMED_OUT);
-    this.sdkReadyFromCache$ = toObservable(client, client.Event.SDK_READY_FROM_CACHE, client.Event.SDK_READY_FROM_CACHE);
-    this.sdkUpdate$ = toObservable(client, client.Event.SDK_UPDATE, client.Event.SDK_UPDATE);
+    this.sdkReady$ = toObservable(client, client.Event.SDK_READY);
+    this.sdkReadyTimedOut$ = toObservable(client, client.Event.SDK_READY_TIMED_OUT);
+    this.sdkReadyFromCache$ = toObservable(client, client.Event.SDK_READY_FROM_CACHE);
+    this.sdkUpdate$ = toObservable(client, client.Event.SDK_UPDATE, false);
   }
 
   /**
@@ -103,7 +160,15 @@ export class SplitioService {
    * @returns Promise<void>
    */
   ready(): Promise<void> {
-    return this.splitClient.ready();
+    return this.getClient().ready();
+  }
+
+  private isInitialized(): boolean {
+    if (!this.config) {
+      console.log('[ERROR] plugin should be initialized');
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -121,16 +186,13 @@ export class SplitioService {
    * Returns the SDK factory
    * @returns {ISDK} split factory
    */
-  getSDKFactory(): SplitIO.ISDK {
+  getSDKFactory(): SplitIO.ISDK | undefined {
+    if (!this.isInitialized()) return undefined;
     return this.splitio;
   }
 
   /**
    * Validates key and returns client if it is initialized for key or controlClient if it isn't
-   * @param splitNames
-   * @param attributes
-   * @param key
-   * @returns
    */
   private getClient(key?: SplitIO.SplitKey | undefined): any {
     const client = this.getSDKClient(key);
@@ -144,14 +206,6 @@ export class SplitioService {
   private parseParams(param1: string | string[] | SplitIO.SplitKey, param2?: string | string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): any{
     if (isString(param2) || Array.isArray(param2)) return { key: param1, splitNames: param2, attributes: param3};
     return { key: this.config.core.key, splitNames: param1, attributes: param2 };
-  }
-
-  private isInitialized(): boolean {
-    if (!this.config) {
-      console.log('[ERROR] plugin should be initialized');
-      return false;
-    }
-    return true;
   }
 
   /**
@@ -243,16 +297,24 @@ export class SplitioService {
   }
 
   /**
+   * Validates key and returns client if it is initialized for key or controlClient if it isn't
+   */
+  private getManager(): any {
+    const client = this.getSDKClient();
+    if (!client) {
+      console.log('[ERROR] The SDK has not being initialized. Returning default response for method call.');
+      return this.defaultManager;
+    }
+    return this.splitManager
+  }
+
+  /**
    * Get the array of splits data in SplitView format.
    * @function getSplits
    * @returns {SplitViews} The list of SplitIO.SplitView.
    */
   getSplits(): SplitIO.SplitViews {
-    if (!this.splitManager) {
-      console.log('[ERROR] The SDK has not being initialized. Returning default response for `getSplits` method call.');
-      return [];
-    }
-    return this.splitManager.splits();
+    return this.getManager().splits();
   }
 
   /**
@@ -262,11 +324,7 @@ export class SplitioService {
    * @returns {SplitView} The SplitIO.SplitView of the given split.
    */
   getSplit(splitName: string): SplitIO.SplitView | null {
-    if (!this.splitManager) {
-      console.log('[ERROR] The SDK has not being initialized. Returning default response for `getSplits` method call.');
-      return null;
-    }
-    return this.splitManager.split(splitName);
+    return this.getManager().split(splitName);
   }
 
   /**
@@ -275,10 +333,6 @@ export class SplitioService {
    * @returns {SplitNames} The lists of Split names.
    */
   getSplitNames(): SplitIO.SplitNames {
-    if (!this.splitManager) {
-      console.log('[ERROR] The SDK has not being initialized. Returning default response for `getSplitNames` method call.');
-      return [];
-    }
-    return this.splitManager.names();
+    return this.getManager().names();
   }
 }

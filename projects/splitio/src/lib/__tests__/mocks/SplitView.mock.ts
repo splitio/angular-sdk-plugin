@@ -19,4 +19,4 @@ export const mockedSplitView = [
     "trafficType": "localhost",
     "treatments": ["off"]
   }
-]
+];

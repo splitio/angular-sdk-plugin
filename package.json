@@ -9,7 +9,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "jest",
     "npm_pack": "cd dist/splitio && npm pack",
-    "package": "npm run build_lib && npm run npm_pack"
+    "package": "npm run build_lib && npm run npm_pack",
+    "lint": "ng lint"
   },
   "private": true,
   "dependencies": {
@@ -30,13 +31,21 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~13.2.5",
+    "@angular-eslint/builder": "13.1.0",
+    "@angular-eslint/eslint-plugin": "13.1.0",
+    "@angular-eslint/eslint-plugin-template": "13.1.0",
+    "@angular-eslint/schematics": "13.1.0",
+    "@angular-eslint/template-parser": "13.1.0",
     "@angular/cli": "~13.2.4",
     "@angular/compiler-cli": "~13.2.0",
     "@splitsoftware/splitio-browserjs": "^0.4.1",
     "@types/jasmine": "~3.10.0",
     "@types/node": "^12.11.1",
+    "@typescript-eslint/eslint-plugin": "5.11.0",
+    "@typescript-eslint/parser": "5.11.0",
     "ajv": "^6.9.1",
     "core-js": "^2.6.12",
+    "eslint": "^8.2.0",
     "jasmine-core": "~4.0.0",
     "ng-packagr": "^13.0.0",
     "typescript": "~4.5.2",

@@ -32,9 +32,11 @@ describe('SplitioService', () => {
     const sdk = service.getSDKFactory();
     if (!sdk) throw new Error('SDK should be initialized');
 
-    service.ready().then(() => {
-      expect(service.isSDKReady).toEqual(true);
-    });
+    service.ready()
+      .then(() => {
+        expect(service.isSDKReady).toEqual(true);
+      })
+      .catch(() => {throw new Error('it should not reach here');});
 
     const updateSubscription = service.sdkUpdate$.subscribe(() => {
       if (calledTimes == 3) {
@@ -46,7 +48,7 @@ describe('SplitioService', () => {
       expect(service.isSDKReady).toEqual(true);
       calledTimes++;
       // this callback modifies the factory features 3 times to ensure that update observable keeps emiting events
-      sdk.settings.features = { test_split: '' + calledTimes };
+      sdk.settings.features = { test_split: calledTimes.toString() };
     });
 
     const readySubscription = service.sdkReady$.subscribe(() => {
@@ -75,7 +77,7 @@ describe('SplitioService', () => {
       error: () => {
         expect(logSpy).toHaveBeenCalledWith('[ERROR] client for key ' + key5 + ' should be initialized first.');
       }
-    })
+    });
 
     service.initClient(key5);
 
@@ -98,7 +100,7 @@ describe('SplitioService', () => {
       }
       calledTimes++;
       // this callback modifies the factory features 3 times to ensure that update observable keeps emiting events
-      sdk.settings.features = { test_split: '' + calledTimes };
+      sdk.settings.features = { test_split: calledTimes.toString() };
     });
 
     const key6ClientSDKReady = service.initClient(key6);
@@ -232,7 +234,7 @@ describe('SplitioService', () => {
         // @ts-ignore
         expect(service.getTreatment(undefined)).toEqual('control');
         expect(service.getTreatment('non_existent_split')).toEqual('control');
-        done()
+        done();
       });
     });
   });
@@ -243,7 +245,7 @@ describe('SplitioService', () => {
     service.sdkReady$.subscribe(() => {
       // @ts-ignore
       expect(service.getSplits()).toEqual(mockedSplitView);
-      expect(service.getSplitNames()).toEqual(mockedSplitView.map(split => split.name))
+      expect(service.getSplitNames()).toEqual(mockedSplitView.map(split => split.name));
       // @ts-ignore
       expect(service.getSplit('test_split2')).toEqual(mockedSplitView[1]);
       expect(service.getSplit('nonexistent_split')).toBeNull();
@@ -252,7 +254,7 @@ describe('SplitioService', () => {
   });
 
   test('Track', (done) => {
-    const trackKey = 'trackKey'
+    const trackKey = 'trackKey';
 
     expect(service.track('user', 'submit')).toEqual(false);
     expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] plugin should be initialized');
@@ -309,7 +311,7 @@ describe('SplitioService', () => {
         expect(mainClientSpy.track).toHaveBeenCalledTimes(2);
 
         done();
-      })
+      });
     });
   });
 });

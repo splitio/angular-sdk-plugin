@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'lib-splitio',
@@ -7,14 +7,8 @@ import { Component, OnInit } from '@angular/core';
       splitio works!
     </p>
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [
   ]
 })
-export class SplitioComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit(): void {
-  }
-
-}
+export class SplitioComponent {}

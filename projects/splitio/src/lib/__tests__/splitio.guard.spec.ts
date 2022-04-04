@@ -1,5 +1,4 @@
 import { getTestBed, TestBed } from '@angular/core/testing';
-
 import { SplitioGuard } from '../splitio.guard';
 import { SplitioService } from '../splitio.service';
 import { localhostConfig } from './testUtils/sdkConfigs';

@@ -39,7 +39,7 @@ export class SplitioService {
    */
   sdkReady$: Observable<string>;
   sdkReadyTimedOut$: Observable<string>;
-  sdkReadyFromCache$: Observable<string>
+  sdkReadyFromCache$: Observable<string>;
   sdkUpdate$: Observable<string>;
 
   /**

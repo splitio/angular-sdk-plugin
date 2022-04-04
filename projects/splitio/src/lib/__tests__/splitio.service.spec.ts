@@ -38,19 +38,6 @@ describe('SplitioService', () => {
       })
       .catch(() => {throw new Error('it should not reach here');});
 
-    const updateSubscription = service.sdkUpdate$.subscribe(() => {
-      if (calledTimes == 3) {
-        expect(service.getTreatment('test_split')).toEqual('3');
-        updateSubscription.unsubscribe();
-        readySubscription.unsubscribe();
-        done();
-      }
-      expect(service.isSDKReady).toEqual(true);
-      calledTimes++;
-      // this callback modifies the factory features 3 times to ensure that update observable keeps emiting events
-      sdk.settings.features = { test_split: calledTimes.toString() };
-    });
-
     const readySubscription = service.sdkReady$.subscribe(() => {
       expect(service.isSDKReady).toEqual(true);
 
@@ -60,6 +47,19 @@ describe('SplitioService', () => {
         // this callback modifies the factory features so the update event will emit and finish this test with done function
         sdk.settings.features = { test_split: '0' };
       });
+    });
+
+    const updateSubscription = service.sdkUpdate$.subscribe(() => {
+      if (calledTimes === 3) {
+        expect(service.getTreatment('test_split')).toEqual('3');
+        updateSubscription.unsubscribe();
+        readySubscription.unsubscribe();
+        done();
+      }
+      expect(service.isSDKReady).toEqual(true);
+      calledTimes++;
+      // this callback modifies the factory features 3 times to ensure that update observable keeps emiting events
+      sdk.settings.features = { test_split: calledTimes.toString() };
     });
   });
 
@@ -87,13 +87,13 @@ describe('SplitioService', () => {
     });
 
     service.getClientSDKUpdate(key5).subscribe(() => {
-      if (calledTimes == 2) {
+      if (calledTimes === 2) {
         service.getClientSDKUpdate(key5).subscribe(() => {
           expect(service.getSDKClient(key5)?.getTreatment('test_split')).toEqual(service.getTreatment(key5,'test_split'));
           expect(service.getTreatment(key5,'test_split')).toEqual('3');
         });
       }
-      if (calledTimes == 3) {
+      if (calledTimes === 3) {
         expect(service.getSDKClient(key5)?.getTreatment('test_split')).toEqual(service.getTreatment(key5,'test_split'));
         expect(service.getTreatment(key5,'test_split')).toEqual('3');
         done();
@@ -183,18 +183,18 @@ describe('SplitioService', () => {
         expect(sharedClientSpy.getTreatment).toHaveBeenCalledTimes(0);
 
         expect(service.getTreatments(nonexistentKey, ['test_split', 'test_split2']))
-        .toEqual({
-          test_split: 'control',
-          test_split2: 'control'
-        });
+          .toEqual({
+            test_split: 'control',
+            test_split2: 'control'
+          });
         expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key ' + nonexistentKey + ' should be initialized first.');
         expect(sharedClientSpy.getTreatmentWithConfig).toHaveBeenCalledTimes(0);
 
         expect(service.getTreatmentsWithConfig(nonexistentKey, ['test_split', 'test_split2']))
-        .toEqual({
-          test_split: { treatment: 'control', config: null },
-          test_split2: { treatment: 'control', config: null }
-        });
+          .toEqual({
+            test_split: { treatment: 'control', config: null },
+            test_split2: { treatment: 'control', config: null }
+          });
         expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key ' + nonexistentKey + ' should be initialized first.');
         expect(sharedClientSpy.getTreatmentsWithConfig).toHaveBeenCalledTimes(0);
 
@@ -208,18 +208,18 @@ describe('SplitioService', () => {
         expect(clientSpy.getTreatmentWithConfig).toHaveBeenCalledTimes(1);
 
         expect(service.getTreatments(sharedClientKey, ['test_split','test_split2'], {attr: true}))
-        .toEqual({
-          'test_split': 'on',
-          'test_split2': 'off'
-        });
+          .toEqual({
+            'test_split': 'on',
+            'test_split2': 'off'
+          });
         expect(sharedClientSpy.getTreatments.mock.calls[0]).toEqual([['test_split','test_split2'], {attr: true}]);
         expect(clientSpy.getTreatments).toHaveBeenCalledTimes(1);
 
         expect(service.getTreatmentsWithConfig(sharedClientKey, ['test_split','test_split2'], {attr: true}))
-        .toEqual({
-          test_split: { treatment: 'on', config: null },
-          test_split2: { treatment: 'off', config: '{"bannerText":"Click here."}' }
-        });
+          .toEqual({
+            test_split: { treatment: 'on', config: null },
+            test_split2: { treatment: 'off', config: '{"bannerText":"Click here."}' }
+          });
         expect(sharedClientSpy.getTreatmentsWithConfig.mock.calls[0]).toEqual([['test_split','test_split2'], {attr: true}]);
         expect(clientSpy.getTreatmentsWithConfig).toHaveBeenCalledTimes(1);
 

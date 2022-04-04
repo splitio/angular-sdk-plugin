@@ -1,6 +1,6 @@
-import { IClient } from "@splitsoftware/splitio-browserjs/types/splitio";
-import { Observable } from "rxjs";
-import { CONTROL } from "./constants";
+import { IClient } from '@splitsoftware/splitio-browserjs/types/splitio';
+import { Observable } from 'rxjs';
+import { CONTROL } from './constants';
 
 /**
  * Private function to return as observable the event on parameter
@@ -8,7 +8,7 @@ import { CONTROL } from "./constants";
  * @param response
  * @returns Observable<any>
  */
- export function toObservable(client: IClient, event: string, isOneTimeEvent = true): Observable<string> {
+export function toObservable(client: IClient, event: string, isOneTimeEvent = true): Observable<string> {
   if (isOneTimeEvent) {
     let wasEventEmitted = false;
     return new Observable(subscriber => {

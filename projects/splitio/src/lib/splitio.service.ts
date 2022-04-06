@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { SplitFactory } from "@splitsoftware/splitio-browserjs/full";
+import { SplitFactory } from '@splitsoftware/splitio-browserjs/full';
 import SplitIO, { IClient } from '@splitsoftware/splitio-browserjs/types/splitio';
 import { Observable } from 'rxjs';
 import { INIT_CLIENT_EXISTS, INIT_CLIENT_FIRST } from './utils/constants';
@@ -21,7 +21,7 @@ export class SplitioService {
   /**
    * The local reference to the Split SDK's Manager.
    */
-  private splitManager: SplitIO.IManager
+  private splitManager: SplitIO.IManager;
   /**
    * Map of intialized clients
    */
@@ -41,9 +41,6 @@ export class SplitioService {
   sdkReadyTimedOut$: Observable<string>;
   sdkReadyFromCache$: Observable<string>;
   sdkUpdate$: Observable<string>;
-
-
-  constructor() { }
 
   /**
    * This method initializes the SDK with the required Browser APIKEY
@@ -192,7 +189,7 @@ export class SplitioService {
       console.log('[ERROR] client' + (key ? ' for key ' + key : '') + ' should be initialized first.');
       return CONTROL_CLIENT;
     }
-    return client
+    return client;
   }
 
   private parseTreatmentParams(param1: string | string[] | SplitIO.SplitKey, param2?: string | string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): any {
@@ -288,7 +285,7 @@ export class SplitioService {
     return this.getClient(key).getTreatmentsWithConfig(splitNames, attributes);
   }
 
-  private parseTrackParams(param1: string | SplitIO.SplitKey, param2: string, param3: number | string | undefined, param4: number | SplitIO.Properties | undefined, param5: SplitIO.Properties | undefined): any {
+  private parseTrackParams(param1: string | SplitIO.SplitKey, param2: string, param3: number | string | undefined, param4: number | SplitIO.Properties | undefined, param5: SplitIO.Properties | undefined) {
     if (isString(param3)) return { key: param1, trafficType: param2, eventType: param3, value: param4, properties: param5};
     return { key: undefined, trafficType: param1, eventType: param2, value: param3, properties: param4 };
   }
@@ -322,13 +319,13 @@ export class SplitioService {
   /**
    * Validates key and returns client if it is initialized for key or controlClient if it isn't
    */
-  private getManager(): any {
+  private getManager() {
     const client = this.getSDKClient();
     if (!client) {
       console.log('[ERROR] The SDK has not being initialized. Returning default response for method call.');
       return DEFAULT_MANAGER;
     }
-    return this.splitManager
+    return this.splitManager;
   }
 
   /**

@@ -1,6 +1,6 @@
-import { IClient } from "@splitsoftware/splitio-browserjs/types/splitio";
-import { Observable } from "rxjs";
-import { CONTROL } from "./constants";
+import { IClient } from '@splitsoftware/splitio-browserjs/types/splitio';
+import { Observable } from 'rxjs';
+import { CONTROL } from './constants';
 
 /**
  * Private function to return as observable the event on parameter
@@ -8,7 +8,7 @@ import { CONTROL } from "./constants";
  * @param response
  * @returns Observable<any>
  */
- export function toObservable(client: IClient, event: string, isOneTimeEvent = true): Observable<string> {
+export function toObservable(client: IClient, event: string, isOneTimeEvent = true): Observable<string> {
   if (isOneTimeEvent) {
     let wasEventEmitted = false;
     return new Observable(subscriber => {
@@ -38,30 +38,30 @@ export function isString(val: any): val is string {
  * client with methods that return default values
  */
 export const CONTROL_CLIENT = {
-  getTreatment: () => { return CONTROL },
-  getTreatmentWithConfig: () => { return { treatment: CONTROL, config: null } },
+  getTreatment: () => { return CONTROL; },
+  getTreatmentWithConfig: () => { return { treatment: CONTROL, config: null }; },
   getTreatments: (splitNames: string[]) => {
-    let result = {}
+    let result = {};
     splitNames.forEach((splitName) => {
       result = { ...result, [splitName]: CONTROL };
-    })
+    });
     return result;
   },
   getTreatmentsWithConfig: (splitNames: string[]) => {
-    let result = {}
+    let result = {};
     splitNames.forEach((splitName) => {
       result = { ...result, [splitName]: { treatment: CONTROL, config: null } };
-    })
+    });
     return result;
   },
-  track: () => {return false}
-}
+  track: () => { return false; }
+};
 
 /**
  *  with methods that return default values
  */
 export const DEFAULT_MANAGER = {
-  splits: () => { return [] },
-  split: () => { return null },
-  names: () => { return [] }
-}
+  splits: () => { return []; },
+  split: () => { return null; },
+  names: () => { return []; }
+};

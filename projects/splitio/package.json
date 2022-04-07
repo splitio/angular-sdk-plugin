@@ -1,6 +1,6 @@
 {
-  "name": "splitio",
-  "version": "0.0.1",
+  "name": "@splitsoftware/splitio-angular",
+  "version": "0.1.0",
   "dependencies": {
     "@splitsoftware/splitio-browserjs": "^0.4.1"
   },

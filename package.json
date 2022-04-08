@@ -1,6 +1,14 @@
 {
-  "name": "angular-sdk-plugin",
-  "version": "0.0.0",
+  "name": "@splitsoftware/splitio-angular",
+  "version": "0.1.0-rc.0",
+  "description": "Split Angular utilities to simplify Split SDK browser client usage",
+  "files": [
+    "README.md",
+    "CONTRIBUTORS-GUIDE.md",
+    "LICENSE",
+    "dist",
+    "projects/splitio"
+  ],
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -10,9 +18,27 @@
     "test": "jest",
     "npm_pack": "cd dist/splitio && npm pack",
     "package": "npm run build_lib && npm run npm_pack",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "publish:rc": "npm run lint && npm run build && npm publish --tag rc"
   },
-  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/splitio/angular-sdk-plugin.git"
+  },
+  "keywords": [
+    "splitio",
+    "sdk",
+    "angular"
+  ],
+  "author": "Emmanuel Zamora <emmanuel.zamora@split.io> (https://github.com/emmaz90)",
+  "contributors": [
+    "Nicolas Zelaya <nicolas.zelaya@split.io> (https://github.com/NicoZelaya)",
+    "Emiliano Sanchez <emiliano.sanchez@split.io> (https://github.com/EmilianoSanchez)",
+    "SDK Team <sdks@split.io>"
+  ],
+  "license": "Apache-2.0",
+  "bugs": "https://github.com/splitio/angular-sdk-plugin/issues",
+  "homepage": "https://github.com/splitio/angular-sdk-plugin#readme",
   "dependencies": {
     "@angular/animations": "~13.2.0",
     "@angular/common": "~13.2.0",
@@ -27,7 +53,7 @@
     "jest-preset-angular": "^11.1.1",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
-    "zone.js": "~0.11.4"
+    "zone.js": "^0.11.4"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~13.2.5",
@@ -38,7 +64,7 @@
     "@angular-eslint/template-parser": "13.1.0",
     "@angular/cli": "~13.2.4",
     "@angular/compiler-cli": "~13.2.0",
-    "@splitsoftware/splitio-browserjs": "^0.4.1",
+    "@splitsoftware/splitio-browserjs": "^0.5.0",
     "@types/jasmine": "~3.10.0",
     "@types/node": "^12.11.1",
     "@typescript-eslint/eslint-plugin": "5.11.0",

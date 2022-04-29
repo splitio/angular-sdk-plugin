@@ -1,14 +1,7 @@
 {
   "name": "@splitsoftware/splitio-angular",
-  "version": "0.1.0-rc.1",
+  "version": "0.1.0-rc.2",
   "description": "Split Angular utilities to simplify Split SDK browser client usage",
-  "files": [
-    "README.md",
-    "CONTRIBUTORS-GUIDE.md",
-    "LICENSE",
-    "dist/splitio",
-    "projects/splitio/src"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/splitio/angular-sdk-plugin.git"

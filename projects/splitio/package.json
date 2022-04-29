@@ -1,6 +1,32 @@
 {
   "name": "@splitsoftware/splitio-angular",
-  "version": "0.1.0-rc.0",
+  "version": "0.1.0-rc.1",
+  "description": "Split Angular utilities to simplify Split SDK browser client usage",
+  "files": [
+    "README.md",
+    "CONTRIBUTORS-GUIDE.md",
+    "LICENSE",
+    "dist/splitio",
+    "projects/splitio/src"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/splitio/angular-sdk-plugin.git"
+  },
+  "keywords": [
+    "splitio",
+    "sdk",
+    "angular"
+  ],
+  "author": "Emmanuel Zamora <emmanuel.zamora@split.io> (https://github.com/emmaz90)",
+  "contributors": [
+    "Nicolas Zelaya <nicolas.zelaya@split.io> (https://github.com/NicoZelaya)",
+    "Emiliano Sanchez <emiliano.sanchez@split.io> (https://github.com/EmilianoSanchez)",
+    "SDK Team <sdks@split.io>"
+  ],
+  "license": "Apache-2.0",
+  "bugs": "https://github.com/splitio/angular-sdk-plugin/issues",
+  "homepage": "https://github.com/splitio/angular-sdk-plugin#readme",
   "dependencies": {
     "@splitsoftware/splitio-browserjs": "^0.5.0"
   },

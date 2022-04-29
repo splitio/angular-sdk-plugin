@@ -1,14 +1,7 @@
 {
   "name": "@splitsoftware/splitio-angular",
-  "version": "0.1.0-rc.0",
+  "version": "0.1.0-rc.1",
   "description": "Split Angular utilities to simplify Split SDK browser client usage",
-  "files": [
-    "README.md",
-    "CONTRIBUTORS-GUIDE.md",
-    "LICENSE",
-    "dist",
-    "projects/splitio"
-  ],
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -16,10 +9,13 @@
     "build_lib": "ng build splitio",
     "watch": "ng build --watch --configuration development",
     "test": "jest",
+    "cp:files": "cp CONTRIBUTORS-GUIDE.md dist && cp LICENSE dist && cp README.md dist",
+    "cp:src": "mkdir -p dist/src && cp -a projects/splitio/src/* dist/src",
+    "cp": "npm run cp:files && npm run cp:src",
     "npm_pack": "cd dist/splitio && npm pack",
     "package": "npm run build_lib && npm run npm_pack",
     "lint": "ng lint",
-    "publish:rc": "npm run lint && npm run build && npm publish --tag rc"
+    "publish:rc": "npm run lint && npm run build_lib && npm run cp && npm publish dist --tag rc"
   },
   "repository": {
     "type": "git",

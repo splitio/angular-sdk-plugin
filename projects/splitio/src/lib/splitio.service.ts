@@ -44,6 +44,8 @@ export class SplitioService {
 
   private buildInstance(key: SplitIO.SplitKey): string {
     // @ts-ignore
+    if (!key.bucketingKey) return key;
+    // @ts-ignore
     return `${key.matchingKey ? key.matchingKey : key}-${key.bucketingKey ? key.bucketingKey : key}-`;
   }
 
@@ -191,7 +193,7 @@ export class SplitioService {
   private getClient(key?: SplitIO.SplitKey | undefined): any {
     const client = this.getSDKClient(key);
     if (!client) {
-      console.log('[ERROR] client' + (key ? ' for key ' + key : '') + ' should be initialized first.');
+      console.log('[ERROR] client' + ( key ? ' for key ' + this.buildInstance(key) : '') + ' should be initialized first.');
       return CONTROL_CLIENT;
     }
     return client;

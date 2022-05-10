@@ -172,30 +172,40 @@ describe('SplitioService', () => {
           }
         });
 
+        // @ts-ignore
+        expect(service.getTreatment({matchingKey: sharedClientKey, bucketingKey:"test"}, 'test_split')).toEqual('control');
+        // @ts-ignore
+        expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key myKey2-test- should be initialized first.');
+
         // Plugin should use control client for nonExistents keys
-        const nonexistentKey = 'myKey3';
+        const nonexistentKey = {matchingKey: 'myKey3', bucketingKey: '1' };
+        // @ts-ignore
         expect(service.getTreatment(nonexistentKey, 'test_split')).toEqual('control');
-        expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key ' + nonexistentKey + ' should be initialized first.');
+        //@ts-ignore
+        expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key myKey3-1- should be initialized first.');
         expect(sharedClientSpy.getTreatment).toHaveBeenCalledTimes(0);
 
+        // @ts-ignore
         expect(service.getTreatmentWithConfig(nonexistentKey, 'test_split')).toEqual({ treatment: 'control', config: null });
-        expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key ' + nonexistentKey + ' should be initialized first.');
+        expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key myKey3-1- should be initialized first.');
         expect(sharedClientSpy.getTreatment).toHaveBeenCalledTimes(0);
 
+        //@ts-ignore
         expect(service.getTreatments(nonexistentKey, ['test_split', 'test_split2']))
           .toEqual({
             test_split: 'control',
             test_split2: 'control'
           });
-        expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key ' + nonexistentKey + ' should be initialized first.');
+        expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key myKey3-1- should be initialized first.');
         expect(sharedClientSpy.getTreatmentWithConfig).toHaveBeenCalledTimes(0);
 
+        //@ts-ignore
         expect(service.getTreatmentsWithConfig(nonexistentKey, ['test_split', 'test_split2']))
           .toEqual({
             test_split: { treatment: 'control', config: null },
             test_split2: { treatment: 'control', config: null }
           });
-        expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key ' + nonexistentKey + ' should be initialized first.');
+        expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key myKey3-1- should be initialized first.');
         expect(sharedClientSpy.getTreatmentsWithConfig).toHaveBeenCalledTimes(0);
 
         // verify that main client is not evaluating when evaluates for shared client

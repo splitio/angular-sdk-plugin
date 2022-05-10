@@ -42,6 +42,13 @@ export class SplitioService {
   sdkReadyFromCache$: Observable<string>;
   sdkUpdate$: Observable<string>;
 
+  private buildInstance(key: SplitIO.SplitKey): string {
+    // @ts-ignore
+    if (!key.bucketingKey) return key;
+    // @ts-ignore
+    return `${key.matchingKey ? key.matchingKey : key}-${key.bucketingKey ? key.bucketingKey : key}-`;
+  }
+
   /**
    * This method initializes the SDK with the required Browser APIKEY
    * and the 'key' according to the Traffic type set (ex.: an user id).
@@ -62,7 +69,7 @@ export class SplitioService {
     this.splitClient.on(this.splitClient.Event.SDK_READY, () => {
       this.isSDKReady = true;
     });
-    this.clientsMap.set(this.config.core.key, this.splitClient);
+    this.clientsMap.set(this.buildInstance(this.config.core.key), this.splitClient);
     return this.sdkReady$;
   }
 
@@ -75,11 +82,11 @@ export class SplitioService {
   initClient(key: SplitIO.SplitKey): Observable<string> {
     let client = this.getSDKClient(key);
     if (client) {
-      console.log('[ERROR] client for key ' + key + ' is already initialized.');
+      console.log('[ERROR] client for key ' + this.buildInstance(key) + ' is already initialized.');
       return new Observable(observer => observer.error(INIT_CLIENT_EXISTS));
     }
     client = this.splitio.client(key);
-    this.clientsMap.set(key, client);
+    this.clientsMap.set(this.buildInstance(key), client);
     return toObservable(client, client.Event.SDK_READY);
   }
 
@@ -168,7 +175,7 @@ export class SplitioService {
   getSDKClient(key?: SplitIO.SplitKey): SplitIO.IClient | undefined {
     if (!this.isInitialized()) return undefined;
     key = key ? key : this.config.core.key;
-    return this.clientsMap.get(key);
+    return this.clientsMap.get(this.buildInstance(key));
   }
 
   /**
@@ -186,7 +193,7 @@ export class SplitioService {
   private getClient(key?: SplitIO.SplitKey | undefined): any {
     const client = this.getSDKClient(key);
     if (!client) {
-      console.log('[ERROR] client' + (key ? ' for key ' + key : '') + ' should be initialized first.');
+      console.log('[ERROR] client' + ( key ? ' for key ' + this.buildInstance(key) : '') + ' should be initialized first.');
       return CONTROL_CLIENT;
     }
     return client;

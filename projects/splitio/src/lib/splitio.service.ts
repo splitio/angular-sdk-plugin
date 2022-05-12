@@ -364,15 +364,20 @@ export class SplitioService {
     return this.getManager().names();
   }
 
+  /**
+   * Destroy all clients instances.
+   * @function destroy
+   * @returns {Observable<void>}
+   */
   destroy():  Observable<void> {
-    const mainKey = this.config.core.key;
+    const mainInstanceKey = this.buildInstance(this.config.core.key);
     this.clientsMap.forEach((client, key) => {
-      if (this.buildInstance(key) !== this.buildInstance(mainKey)){
+      if (this.buildInstance(key) !== mainInstanceKey){
         client.destroy();
         this.clientsMap.delete(this.buildInstance(key));
       }
     });
-    this.clientsMap.delete(this.buildInstance(mainKey));
+    this.clientsMap.delete(mainInstanceKey);
     this.splitio = undefined;
     return from(this.splitClient.destroy());
   }

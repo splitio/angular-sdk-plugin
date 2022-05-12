@@ -128,7 +128,6 @@ describe('SplitioService', () => {
         next: () => { throw new Error('it should not reach here'); },
         error: () => {
           expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] There is another instance of the SDK.');
-          expect(service.config).toEqual(localhostConfig);
         }
       });
 
@@ -173,7 +172,7 @@ describe('SplitioService', () => {
         });
 
         // @ts-ignore
-        expect(service.getTreatment({matchingKey: sharedClientKey, bucketingKey:"test"}, 'test_split')).toEqual('control');
+        expect(service.getTreatment({matchingKey: sharedClientKey, bucketingKey:'test'}, 'test_split')).toEqual('control');
         // @ts-ignore
         expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key myKey2-test- should be initialized first.');
 
@@ -321,6 +320,28 @@ describe('SplitioService', () => {
         expect(mainClientSpy.track).toHaveBeenCalledTimes(2);
 
         done();
+      });
+    });
+  });
+
+  test('Destroy', (done) => {
+    const clientKey = 'clientKey';
+
+    service.init(localhostConfig).subscribe(() => {
+      service.initClient(clientKey).subscribe(() => {
+        expect(service.getTreatment(localhostConfig.core.key, 'test_split', {attr: true})).toEqual('on');
+        expect(service.getTreatment(clientKey, 'test_split', {attr: true})).toEqual('on');
+
+        service.destroy().subscribe(() => {
+          expect(service.getTreatment(localhostConfig.core.key, 'test_split', {attr: true})).toEqual('control');
+          expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] plugin should be initialized');
+          expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key ' + localhostConfig.core.key + ' should be initialized first.');
+
+          expect(service.getTreatment(clientKey, 'test_split', {attr: true})).toEqual('control');
+          expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] plugin should be initialized');
+          expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key ' + clientKey + ' should be initialized first.');
+          done();
+        });
       });
     });
   });

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SplitFactory } from '@splitsoftware/splitio-browserjs/full';
 import SplitIO, { IClient } from '@splitsoftware/splitio-browserjs/types/splitio';
-import { Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import { INIT_CLIENT_EXISTS, INIT_CLIENT_FIRST } from './utils/constants';
 import { CONTROL_CLIENT, DEFAULT_MANAGER, isString, toObservable} from './utils/utils';
 
@@ -13,7 +13,7 @@ export class SplitioService {
   /**
    * The local reference to the Split SDK.
    */
-  private splitio: SplitIO.ISDK;
+  private splitio: SplitIO.ISDK | undefined;
   /**
    * The local reference to the Split SDK's Client.
    */
@@ -33,7 +33,7 @@ export class SplitioService {
   /**
    * Factory config
    */
-  config: SplitIO.IBrowserSettings;
+  private config: SplitIO.IBrowserSettings;
   /**
    * SDK events observables
    */
@@ -85,6 +85,7 @@ export class SplitioService {
       console.log('[ERROR] client for key ' + this.buildInstance(key) + ' is already initialized.');
       return new Observable(observer => observer.error(INIT_CLIENT_EXISTS));
     }
+    if (!this.splitio) return new Observable(observer => observer.error(INIT_CLIENT_FIRST));
     client = this.splitio.client(key);
     this.clientsMap.set(this.buildInstance(key), client);
     return toObservable(client, client.Event.SDK_READY);
@@ -160,7 +161,7 @@ export class SplitioService {
   }
 
   private isInitialized(): boolean {
-    if (!this.config) {
+    if (!this.splitio) {
       console.log('[ERROR] plugin should be initialized');
       return false;
     }
@@ -361,5 +362,23 @@ export class SplitioService {
    */
   getSplitNames(): SplitIO.SplitNames {
     return this.getManager().names();
+  }
+
+  /**
+   * Destroy all clients instances.
+   * @function destroy
+   * @returns {Observable<void>}
+   */
+  destroy():  Observable<void> {
+    const mainInstanceKey = this.buildInstance(this.config.core.key);
+    this.clientsMap.forEach((client, key) => {
+      if (this.buildInstance(key) !== mainInstanceKey){
+        client.destroy();
+        this.clientsMap.delete(this.buildInstance(key));
+      }
+    });
+    this.clientsMap.delete(mainInstanceKey);
+    this.splitio = undefined;
+    return from(this.splitClient.destroy());
   }
 }

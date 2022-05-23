@@ -1,5 +1,3 @@
-import SplitIO from '@splitsoftware/splitio-browserjs/types/splitio';
-
 export const localhostConfig: SplitIO.IBrowserSettings = {
   core: {
     authorizationKey: 'localhost',

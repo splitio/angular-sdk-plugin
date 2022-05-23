@@ -12,6 +12,7 @@
     "cp:files": "cp CONTRIBUTORS-GUIDE.md dist && cp LICENSE dist && cp README.md dist",
     "cp:src": "mkdir -p dist/src && cp -a projects/splitio/src/* dist/src",
     "cp": "npm run cp:files && npm run cp:src",
+    "postcp": "./version_replace.sh",
     "npm_pack": "cd dist && npm pack",
     "package": "npm run lint && npm run build_lib && npm run cp && npm run npm_pack",
     "lint": "ng lint",
@@ -71,7 +72,8 @@
     "jasmine-core": "~4.0.0",
     "ng-packagr": "^13.0.0",
     "typescript": "~4.5.2",
-    "unfetch": "^4.2.0"
+    "unfetch": "^4.2.0",
+    "replace": "^1.2.1"
   },
   "jest": {
     "preset": "jest-preset-angular",

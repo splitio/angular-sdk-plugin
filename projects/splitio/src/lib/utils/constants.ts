@@ -10,3 +10,5 @@ export const INIT_CLIENT_EXISTS = 'init::clientExists';
  * string constant for observable to return when client is not initialized
  */
 export const INIT_CLIENT_FIRST = 'init::clientFirst';
+
+export const VERSION = 'angular-' + 'ANGULAR_SDK_VERSION_NUMBER';

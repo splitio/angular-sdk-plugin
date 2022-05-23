@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { SplitFactory } from '@splitsoftware/splitio-browserjs/full';
 import SplitIO, { IClient } from '@splitsoftware/splitio-browserjs/types/splitio';
 import { from, Observable } from 'rxjs';
-import { INIT_CLIENT_EXISTS, INIT_CLIENT_FIRST } from './utils/constants';
+import { INIT_CLIENT_EXISTS, INIT_CLIENT_FIRST, VERSION } from './utils/constants';
 import { CONTROL_CLIENT, DEFAULT_MANAGER, isString, toObservable} from './utils/utils';
 
 @Injectable({
@@ -62,7 +62,10 @@ export class SplitioService {
       return new Observable(observer => observer.error(INIT_CLIENT_EXISTS));
     }
     this.config = config;
-    this.splitio = SplitFactory(config);
+    // @ts-ignore. 2nd param is not part of type definitions. Used to overwrite the version of the SDK for correct tracking.
+    this.splitio = SplitFactory(config, (modules) => {
+      modules.settings.version = VERSION;
+    });
     this.splitClient = this.splitio.client();
     this.splitManager = this.splitio.manager();
     this.sdkInitEventObservable();

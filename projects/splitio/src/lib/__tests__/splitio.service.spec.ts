@@ -180,7 +180,7 @@ describe('SplitioService', () => {
         const nonexistentKey = {matchingKey: 'myKey3', bucketingKey: '1' };
         // @ts-ignore
         expect(service.getTreatment(nonexistentKey, 'test_split')).toEqual('control');
-        //@ts-ignore
+        // @ts-ignore
         expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key myKey3-1- should be initialized first.');
         expect(sharedClientSpy.getTreatment).toHaveBeenCalledTimes(0);
 
@@ -189,7 +189,7 @@ describe('SplitioService', () => {
         expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key myKey3-1- should be initialized first.');
         expect(sharedClientSpy.getTreatment).toHaveBeenCalledTimes(0);
 
-        //@ts-ignore
+        // @ts-ignore
         expect(service.getTreatments(nonexistentKey, ['test_split', 'test_split2']))
           .toEqual({
             test_split: 'control',
@@ -198,7 +198,7 @@ describe('SplitioService', () => {
         expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key myKey3-1- should be initialized first.');
         expect(sharedClientSpy.getTreatmentWithConfig).toHaveBeenCalledTimes(0);
 
-        //@ts-ignore
+        // @ts-ignore
         expect(service.getTreatmentsWithConfig(nonexistentKey, ['test_split', 'test_split2']))
           .toEqual({
             test_split: { treatment: 'control', config: null },

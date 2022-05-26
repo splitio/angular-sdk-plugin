@@ -2,7 +2,7 @@
 
 VERSION=$(node -e "(function () { console.log(require('./package.json').version) })()")
 
-replace 'ANGULAR_SDK_VERSION_NUMBER' $VERSION ./dist/esm2020/lib/utils/constants.mjs ./dist/fesm2015/splitsoftware-splitio-angular.mjs ./dist/fesm2020/splitsoftware-splitio-angular.mjs
+replace 'ANGULAR_SDK_VERSION_NUMBER' $VERSION ./dist/esm2015/lib/utils/constants.js ./dist/fesm2015/splitsoftware-splitio-angular.js
 
 if [ $? -eq 0 ]
 then

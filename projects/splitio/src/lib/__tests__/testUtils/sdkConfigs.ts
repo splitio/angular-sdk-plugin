@@ -1,4 +1,4 @@
-import { LocalhostFromObject } from "@splitsoftware/splitio-browserjs";
+import { LocalhostFromObject } from '@splitsoftware/splitio-browserjs';
 
 export const localhostConfig: SplitIO.IBrowserSettings = {
   core: {

@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { SplitFactory } from '@splitsoftware/splitio-browserjs/full';
 import * as SplitIO from '@splitsoftware/splitio-browserjs/types/splitio';
 import { from, Observable } from 'rxjs';
-import { INIT_CLIENT_EXISTS, INIT_CLIENT_FIRST, VERSION } from './utils/constants';
-import { CONTROL_CLIENT, DEFAULT_MANAGER, isString, toObservable} from './utils/utils';
+import { INIT_CLIENT_EXISTS, INIT_CLIENT_FIRST, CONTROL_CLIENT, DEFAULT_MANAGER, VERSION } from './utils/constants';
+import { buildInstance, parseTrackParams, parseTreatmentParams } from './utils/utils';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +27,10 @@ export class SplitioService {
    */
   private clientsMap: Map<string, SplitIO.IClient> = new Map<string, SplitIO.IClient>();
   /**
+   * Map of events status of intialized clients
+   */
+  private emittedEvents: Map<string, boolean> = new Map<string, boolean>();
+  /**
    * Flag to determine if SDK is ready or not.
    */
   isSDKReady = false;
@@ -41,13 +45,6 @@ export class SplitioService {
   sdkReadyTimedOut$: Observable<string>;
   sdkReadyFromCache$: Observable<string>;
   sdkUpdate$: Observable<string>;
-
-  private buildInstance(key: SplitIO.SplitKey): string {
-    // @ts-ignore
-    if (!key.bucketingKey) return key;
-    // @ts-ignore
-    return `${key.matchingKey ? key.matchingKey : key}-${key.bucketingKey ? key.bucketingKey : key}-`;
-  }
 
   /**
    * This method initializes the SDK with the required Browser APIKEY
@@ -69,10 +66,11 @@ export class SplitioService {
     this.splitClient = this.splitio.client();
     this.splitManager = this.splitio.manager();
     this.sdkInitEventObservable();
+    const instanceKey = buildInstance(this.config.core.key);
     this.splitClient.on(this.splitClient.Event.SDK_READY, () => {
       this.isSDKReady = true;
     });
-    this.clientsMap.set(this.buildInstance(this.config.core.key), this.splitClient);
+    this.clientsMap.set(instanceKey, this.splitClient);
     return this.sdkReady$;
   }
 
@@ -85,13 +83,13 @@ export class SplitioService {
   initClient(key: SplitIO.SplitKey): Observable<string> {
     let client = this.getSDKClient(key);
     if (client) {
-      console.log('[ERROR] client for key ' + this.buildInstance(key) + ' is already initialized.');
+      console.log('[ERROR] client for key ' + buildInstance(key) + ' is already initialized.');
       return new Observable(observer => observer.error(INIT_CLIENT_EXISTS));
     }
     if (!this.splitio) return new Observable(observer => observer.error(INIT_CLIENT_FIRST));
     client = this.splitio.client(key);
-    this.clientsMap.set(this.buildInstance(key), client);
-    return toObservable(client, client.Event.SDK_READY);
+    this.clientsMap.set(buildInstance(key), client);
+    return this.toObservable(key, client, client.Event.SDK_READY);
   }
 
   private getClientObservable(key: SplitIO.SplitKey, event: string, isOneTimeEvent = true): Observable<string> {
@@ -99,7 +97,7 @@ export class SplitioService {
     if (client === CONTROL_CLIENT) {
       return new Observable(observer => observer.error(INIT_CLIENT_FIRST));
     }
-    return toObservable(client, client.Event[event], isOneTimeEvent);
+    return this.toObservable(key, client, client.Event[event], isOneTimeEvent);
   }
 
   /**
@@ -147,10 +145,11 @@ export class SplitioService {
    */
   private sdkInitEventObservable(): void {
     const client = this.splitClient;
-    this.sdkReady$ = toObservable(client, client.Event.SDK_READY);
-    this.sdkReadyTimedOut$ = toObservable(client, client.Event.SDK_READY_TIMED_OUT);
-    this.sdkReadyFromCache$ = toObservable(client, client.Event.SDK_READY_FROM_CACHE);
-    this.sdkUpdate$ = toObservable(client, client.Event.SDK_UPDATE, false);
+    const mainKey = this.config.core.key;
+    this.sdkReady$ = this.toObservable(mainKey, client, client.Event.SDK_READY);
+    this.sdkReadyTimedOut$ = this.toObservable(mainKey, client, client.Event.SDK_READY_TIMED_OUT);
+    this.sdkReadyFromCache$ = this.toObservable(mainKey, client, client.Event.SDK_READY_FROM_CACHE);
+    this.sdkUpdate$ = this.toObservable(mainKey, client, client.Event.SDK_UPDATE, false);
   }
 
   /**
@@ -179,7 +178,7 @@ export class SplitioService {
   getSDKClient(key?: SplitIO.SplitKey): SplitIO.IClient | undefined {
     if (!this.isInitialized()) return undefined;
     key = key ? key : this.config.core.key;
-    return this.clientsMap.get(this.buildInstance(key));
+    return this.clientsMap.get(buildInstance(key));
   }
 
   /**
@@ -197,15 +196,10 @@ export class SplitioService {
   private getClient(key?: SplitIO.SplitKey | undefined): any {
     const client = this.getSDKClient(key);
     if (!client) {
-      console.log('[ERROR] client' + ( key ? ' for key ' + this.buildInstance(key) : '') + ' should be initialized first.');
+      console.log('[ERROR] client' + ( key ? ' for key ' + buildInstance(key) : '') + ' should be initialized first.');
       return CONTROL_CLIENT;
     }
     return client;
-  }
-
-  private parseTreatmentParams(param1: string | string[] | SplitIO.SplitKey, param2?: string | string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): any {
-    if (isString(param2) || Array.isArray(param2)) return { key: param1, splitNames: param2, attributes: param3};
-    return { key: undefined, splitNames: param1, attributes: param2 };
   }
 
   /**
@@ -226,7 +220,7 @@ export class SplitioService {
    */
   getTreatment(splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.Treatment;
   getTreatment(param1: string | SplitIO.SplitKey, param2?: string | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.Treatment {
-    const {key, splitNames, attributes} = this.parseTreatmentParams(param1, param2, param3);
+    const {key, splitNames, attributes} = parseTreatmentParams(param1, param2, param3);
     return this.getClient(key).getTreatment(splitNames, attributes);
   }
 
@@ -248,7 +242,7 @@ export class SplitioService {
    */
   getTreatmentWithConfig(splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentWithConfig;
   getTreatmentWithConfig(param1: string | SplitIO.SplitKey, param2?: string | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.TreatmentWithConfig {
-    const {key, splitNames, attributes} = this.parseTreatmentParams(param1, param2, param3);
+    const {key, splitNames, attributes} = parseTreatmentParams(param1, param2, param3);
     return this.getClient(key).getTreatmentWithConfig(splitNames, attributes);
   }
 
@@ -270,7 +264,7 @@ export class SplitioService {
    */
   getTreatments(splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.Treatments;
   getTreatments(param1: string[] | SplitIO.SplitKey, param2?: string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.Treatments {
-    const {key, splitNames, attributes} = this.parseTreatmentParams(param1, param2, param3);
+    const {key, splitNames, attributes} = parseTreatmentParams(param1, param2, param3);
     return this.getClient(key).getTreatments(splitNames, attributes);
   }
 
@@ -292,13 +286,8 @@ export class SplitioService {
    */
   getTreatmentsWithConfig(splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig;
   getTreatmentsWithConfig(param1: string[] | SplitIO.SplitKey, param2?: string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig {
-    const {key, splitNames, attributes} = this.parseTreatmentParams(param1, param2, param3);
+    const {key, splitNames, attributes} = parseTreatmentParams(param1, param2, param3);
     return this.getClient(key).getTreatmentsWithConfig(splitNames, attributes);
-  }
-
-  private parseTrackParams(param1: string | SplitIO.SplitKey, param2: string, param3: number | string | undefined, param4: number | SplitIO.Properties | undefined, param5: SplitIO.Properties | undefined) {
-    if (isString(param3)) return { key: param1, trafficType: param2, eventType: param3, value: param4, properties: param5};
-    return { key: undefined, trafficType: param1, eventType: param2, value: param3, properties: param4 };
   }
 
   /**
@@ -323,7 +312,7 @@ export class SplitioService {
    */
   track(trafficType: string, eventType: string, value?: number | undefined, properties?: SplitIO.Properties | undefined): boolean;
   track(param1: string | SplitIO.SplitKey, param2: string, param3?: string | number | undefined, param4?: number | SplitIO.Properties | undefined, param5?: SplitIO.Properties | undefined): boolean {
-    const {key, trafficType, eventType, value, properties} = this.parseTrackParams(param1, param2, param3, param4, param5);
+    const {key, trafficType, eventType, value, properties} = parseTrackParams(param1, param2, param3, param4, param5);
     return this.getClient(key).track(trafficType, eventType, value, properties);
   }
 
@@ -372,16 +361,46 @@ export class SplitioService {
    * @function destroy
    * @returns {Observable<unknown>}
    */
-  destroy(): Observable<unknown> {
-    const mainInstanceKey = this.buildInstance(this.config.core.key);
+  destroy():  Observable<void> {
+    const mainInstanceKey = buildInstance(this.config.core.key);
     this.clientsMap.forEach((client, key) => {
-      if (this.buildInstance(key) !== mainInstanceKey){
+      if (buildInstance(key) !== mainInstanceKey){
         client.destroy();
-        this.clientsMap.delete(this.buildInstance(key));
+        this.clientsMap.delete(buildInstance(key));
       }
     });
     this.clientsMap.delete(mainInstanceKey);
     this.splitio = undefined;
     return from(this.splitClient.destroy());
   }
+
+  /**
+   * Private function to return as observable the event on parameter
+   * @param {string} event
+   * @param response
+   * @returns Observable<any>
+   */
+  private toObservable(key: SplitIO.SplitKey, client: SplitIO.IClient, event: string, isOneTimeEvent = true): Observable<string> {
+    const eventKey = buildInstance(key) + event;
+    if (isOneTimeEvent) {
+      return new Observable(subscriber => {
+        const wasEventEmitted = this.emittedEvents.get(eventKey);
+        if (wasEventEmitted) {
+          Promise.resolve().then(() => subscriber.next(event));
+        } else {
+          client.once(event, () => {
+            this.emittedEvents.set(eventKey, true);
+            subscriber.next(event);
+          });
+        }
+      });
+    } else {
+      return new Observable(subscriber => {
+        client.on(event, () => {
+          subscriber.next(event);
+        });
+      });
+    }
+  }
+
 }

@@ -1,3 +1,5 @@
+import { LocalhostFromObject } from "@splitsoftware/splitio-browserjs";
+
 export const localhostConfig: SplitIO.IBrowserSettings = {
   core: {
     authorizationKey: 'localhost',
@@ -15,6 +17,9 @@ export const localhostConfig: SplitIO.IBrowserSettings = {
   },
   startup: {
     readyTimeout: 8
+  },
+  sync: {
+    localhostMode: LocalhostFromObject()
   }
 };
 

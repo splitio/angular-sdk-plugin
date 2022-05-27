@@ -1,0 +1,48 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "splitio": {
+      "projectType": "library",
+      "root": "projects/splitio",
+      "sourceRoot": "projects/splitio/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/splitio/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/splitio/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/splitio/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/splitio/tsconfig.lib.json",
+              "projects/splitio/tsconfig.spec.json",
+              "tsconfig.json"
+            ],
+            "exclude": [
+              "**/node_modules/**",
+              "projects/splitio/**/*.spec.ts"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "defaultProject": "splitio",
+  "cli": {
+    "defaultCollection": "@angular-eslint/schematics"
+  }
+}

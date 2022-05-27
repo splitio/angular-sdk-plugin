@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { SplitFactory } from '@splitsoftware/splitio-browserjs/full';
+import { SplitFactory } from '@splitsoftware/splitio-browserjs';
 import * as SplitIO from '@splitsoftware/splitio-browserjs/types/splitio';
 import { from, Observable } from 'rxjs';
 import { INIT_CLIENT_EXISTS, INIT_CLIENT_FIRST, CONTROL_CLIENT, DEFAULT_MANAGER, VERSION } from './utils/constants';

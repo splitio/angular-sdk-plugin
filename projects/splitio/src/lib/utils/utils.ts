@@ -1,67 +1,20 @@
-import { IClient } from '@splitsoftware/splitio-browserjs/types/splitio';
-import { Observable } from 'rxjs';
-import { CONTROL } from './constants';
+export function buildInstance(key: SplitIO.SplitKey): string {
+  // @ts-ignore
+  if (!key.bucketingKey) return key;
+  // @ts-ignore
+  return `${key.matchingKey ? key.matchingKey : key}-${key.bucketingKey ? key.bucketingKey : key}-`;
+}
 
-/**
- * Private function to return as observable the event on parameter
- * @param {string} event
- * @param response
- * @returns Observable<any>
- */
-export function toObservable(client: IClient, event: string, isOneTimeEvent = true): Observable<string> {
-  if (isOneTimeEvent) {
-    let wasEventEmitted = false;
-    return new Observable(subscriber => {
-      if (wasEventEmitted) {
-        subscriber.next(event);
-      } else {
-        client.once(event, () => {
-          wasEventEmitted = true;
-          subscriber.next(event);
-        });
-      }
-    });
-  } else {
-    return new Observable(subscriber => {
-      client.on(event, () => {
-        subscriber.next(event);
-      });
-    });
-  }
+export function parseTreatmentParams(param1: string | string[] | SplitIO.SplitKey, param2?: string | string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): any {
+  if (isString(param2) || Array.isArray(param2)) return { key: param1, splitNames: param2, attributes: param3};
+  return { key: undefined, splitNames: param1, attributes: param2 };
+}
+
+export function parseTrackParams(param1: string | SplitIO.SplitKey, param2: string, param3: number | string | undefined, param4: number | SplitIO.Properties | undefined, param5: SplitIO.Properties | undefined) {
+  if (isString(param3)) return { key: param1, trafficType: param2, eventType: param3, value: param4, properties: param5};
+  return { key: undefined, trafficType: param1, eventType: param2, value: param3, properties: param4 };
 }
 
 export function isString(val: any): val is string {
   return typeof val === 'string' || val instanceof String;
 }
-
-/**
- * client with methods that return default values
- */
-export const CONTROL_CLIENT = {
-  getTreatment: () => { return CONTROL; },
-  getTreatmentWithConfig: () => { return { treatment: CONTROL, config: null }; },
-  getTreatments: (splitNames: string[]) => {
-    let result = {};
-    splitNames.forEach((splitName) => {
-      result = { ...result, [splitName]: CONTROL };
-    });
-    return result;
-  },
-  getTreatmentsWithConfig: (splitNames: string[]) => {
-    let result = {};
-    splitNames.forEach((splitName) => {
-      result = { ...result, [splitName]: { treatment: CONTROL, config: null } };
-    });
-    return result;
-  },
-  track: () => { return false; }
-};
-
-/**
- *  with methods that return default values
- */
-export const DEFAULT_MANAGER = {
-  splits: () => { return []; },
-  split: () => { return null; },
-  names: () => { return []; }
-};

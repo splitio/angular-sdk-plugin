@@ -361,7 +361,7 @@ export class SplitioService {
    * @function destroy
    * @returns {Observable<unknown>}
    */
-  destroy():  Observable<void> {
+  destroy(): Observable<void> {
     const mainInstanceKey = buildInstance(this.config.core.key);
     this.clientsMap.forEach((client, key) => {
       if (buildInstance(key) !== mainInstanceKey){

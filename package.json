@@ -17,7 +17,7 @@
     "package": "npm run lint && npm run build_lib && npm run cp && npm run npm_pack",
     "lint": "ng lint",
     "publish:rc": "npm run lint && npm run build_lib && npm run cp && npm publish dist --tag rc",
-    "publish:stable": "npm run check && npm run build && npm publish"
+    "publish:stable": "npm run lint && npm run build_lib && npm run cp && npm publish dist"
   },
   "repository": {
     "type": "git",

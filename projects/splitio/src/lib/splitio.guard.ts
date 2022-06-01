@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, CanActivateChild, CanLoad } from '@angular/router';
-import { SplitioService } from './splitio.service';
+import { SplitService } from './splitio.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SplitioGuard implements CanActivate, CanLoad, CanActivateChild {
 
-  constructor(private splitService: SplitioService) {}
+  constructor(private splitService: SplitService) {}
 
   canActivate(): boolean {
     return this.splitService.isSDKReady;

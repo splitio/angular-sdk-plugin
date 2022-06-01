@@ -1,17 +1,17 @@
 import { getTestBed, TestBed } from '@angular/core/testing';
 import { SplitioGuard } from '../splitio.guard';
-import { SplitioService } from '../splitio.service';
+import { SplitService } from '../splitio.service';
 import { localhostConfig } from './testUtils/sdkConfigs';
 
 describe('SplitioGuard', () => {
   let guard: SplitioGuard;
-  let service: SplitioService;
+  let service: SplitService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
     const injector = getTestBed();
     guard = injector.inject(SplitioGuard);
-    service = injector.inject(SplitioService);
+    service = injector.inject(SplitService);
   });
 
   it('splitio guard', (done) => {

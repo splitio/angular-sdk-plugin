@@ -8,7 +8,7 @@ import { buildInstance, parseTrackParams, parseTreatmentParams } from './utils/u
 @Injectable({
   providedIn: 'root'
 })
-export class SplitioService {
+export class SplitService {
 
   /**
    * The local reference to the Split SDK.

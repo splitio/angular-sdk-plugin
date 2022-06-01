@@ -1,16 +1,16 @@
-import { SplitioService } from '../splitio.service';
+import { SplitService } from '../splitio.service';
 import { mockedSplitView } from './mocks/SplitView.mock';
 import { config, localhostConfig } from './testUtils/sdkConfigs';
 
-describe('SplitioService', () => {
+describe('SplitService', () => {
 
-  let service: SplitioService;
+  let service: SplitService;
 
   const logSpy = jest.spyOn(console, 'log');
   let logCalls = 0;
 
   beforeEach(() => {
-    service = new SplitioService();
+    service = new SplitService();
     logSpy.mockReset();
     logCalls = 0;
   });

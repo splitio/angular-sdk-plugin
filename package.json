@@ -1,6 +1,6 @@
 {
   "name": "@splitsoftware/splitio-angular",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Split Angular utilities to simplify Split SDK browser client usage",
   "scripts": {
     "ng": "ng",
@@ -9,7 +9,7 @@
     "build_lib": "ng build splitio",
     "watch": "ng build --watch --configuration development",
     "test": "jest",
-    "cp:files": "cp CONTRIBUTORS-GUIDE.md dist && cp LICENSE dist && cp README.md dist",
+    "cp:files": "cp CONTRIBUTORS-GUIDE.md dist && cp LICENSE dist && cp README.md dist && cp CHANGES.txt dist",
     "cp:src": "mkdir -p dist/src && cp -a projects/splitio/src/* dist/src",
     "cp": "npm run cp:files && npm run cp:src",
     "postcp": "./version_replace.sh",

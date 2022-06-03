@@ -167,7 +167,7 @@ describe('SplitService', () => {
         service.initClient(sharedClientKey).subscribe({
           next: () => { throw new Error('it should not reach here'); },
           error: () => {
-            expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client for key ' + sharedClientKey + ' is already initialized.');
+            expect(logSpy.mock.calls[logCalls++][0]).toEqual('[WARN] client for key ' + sharedClientKey + ' is already initialized.');
           }
         });
 

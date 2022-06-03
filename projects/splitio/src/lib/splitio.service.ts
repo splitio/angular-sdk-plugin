@@ -67,7 +67,9 @@ export class SplitService {
     this.splitManager = this.splitio.manager();
     this.sdkInitEventObservable();
     const instanceKey = buildInstance(this.config.core.key);
-    this.splitClient.on(this.splitClient.Event.SDK_READY, () => {
+    const sdkReady = this.splitClient.Event.SDK_READY;
+    this.splitClient.on(sdkReady, () => {
+      this.emittedEvents.set(instanceKey + sdkReady, true);
       this.isSDKReady = true;
     });
     this.clientsMap.set(instanceKey, this.splitClient);
@@ -83,7 +85,7 @@ export class SplitService {
   initClient(key: SplitIO.SplitKey): Observable<string> {
     let client = this.getSDKClient(key);
     if (client) {
-      console.log('[ERROR] client for key ' + buildInstance(key) + ' is already initialized.');
+      console.log('[WARN] client for key ' + buildInstance(key) + ' is already initialized.');
       return new Observable(observer => observer.error(INIT_CLIENT_EXISTS));
     }
     if (!this.splitio) return new Observable(observer => observer.error(INIT_CLIENT_FIRST));

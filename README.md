@@ -11,8 +11,37 @@ This SDK is compatible with Angular 10.2.5 and above.
 
 ## Getting started
 Below is a simple example that describes the instantiation and most basic usage of our SDK:
-```
+```javascript
+// Import the Service
+import { SplitService } from '@splitsoftware/splitio-angular';
 
+export class AppComponent implements OnInit {
+
+  constructor(
+    // inject SplitService dependency
+    private splitio: SplitService
+  ) {}
+
+  ngOnInit(): void {
+
+    // Subscribe to init to make sure the SDK is properly loaded before asking for a treatment
+    this.splitio.init({
+      core: {
+        authorizationKey: 'YOUR_SDK_API_KEY',
+        key: 'CUSTOMER_ID'
+      }
+    }).subscribe(() => {
+      var treatment = this.splitio.getTreatment('SPLIT_NAME');
+      if (treatment == 'on') {
+        // insert code here for on treatment
+      } else if (treatment == 'off') {
+        // insert code here for off treatment
+      } else {
+        // insert your control treatment code here
+      }
+    });
+  }
+}
 ```
 
 ## Submitting issues

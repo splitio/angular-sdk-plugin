@@ -1,6 +1,6 @@
 {
   "name": "@splitsoftware/splitio-angular",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Split Angular utilities to simplify Split SDK browser client usage",
   "scripts": {
     "ng": "ng",
@@ -57,7 +57,7 @@
     "@angular-devkit/build-angular": "~0.1002.4",
     "@angular/cli": "~10.2.4",
     "@angular/compiler-cli": "~10.2.5",
-    "@splitsoftware/splitio-browserjs": "^0.6.0",
+    "@splitsoftware/splitio-browserjs": "^0.7.0",
     "@types/jasmine": "~3.10.0",
     "@types/node": "^12.11.1",
     "ajv": "^6.9.1",

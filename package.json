@@ -39,6 +39,7 @@
   "homepage": "https://github.com/splitio/angular-sdk-plugin#readme",
   "dependencies": {},
   "devDependencies": {
+    "@angular/cli": "~10.2.4",
     "@angular/common": "~10.2.5",
     "@angular/compiler": "~10.2.5",
     "@angular/compiler-cli": "~10.2.5",

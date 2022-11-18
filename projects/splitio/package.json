@@ -1,6 +1,6 @@
 {
   "name": "@splitsoftware/splitio-angular",
-  "version": "13.0.0",
+  "version": "14.0.0",
   "description": "Split Angular utilities to simplify Split SDK browser client usage",
   "repository": {
     "type": "git",
@@ -24,7 +24,7 @@
     "@splitsoftware/splitio-browserjs": "^0.9.0"
   },
   "peerDependencies": {
-    "@angular/core": "^13.3.0",
+    "@angular/core": "^14.2.0",
     "rxjs": "^6.6.0"
   }
 }

@@ -25,16 +25,11 @@
           "defaultConfiguration": "production"
         },
         "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
+          "builder": "@angular-eslint/builder:lint",
           "options": {
-            "tsConfig": [
-              "projects/splitio/tsconfig.lib.json",
-              "projects/splitio/tsconfig.spec.json",
-              "tsconfig.json"
-            ],
-            "exclude": [
-              "**/node_modules/**",
-              "projects/splitio/**/*.spec.ts"
+            "lintFilePatterns": [
+              "projects/splitio/**/*.ts",
+              "projects/splitio/**/*.html"
             ]
           }
         }

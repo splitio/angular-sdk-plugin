@@ -1,3 +1,6 @@
+0.5.0 (December 15, 2022)
+ - Updated the minimum angular version to match Angular's support up to date
+
 0.4.0 (October 5, 2022)
  - Added a new impressions mode for the SDK called NONE, to be used in factory when there is no desire to capture impressions on an SDK factory to feed Split's analytics engine. Running NONE mode, the SDK will only capture unique keys evaluated for a particular feature flag instead of full blown impressions.
  - Updated default value of `scheduler.featuresRefreshRate` config parameter from 30 seconds to 60 seconds.

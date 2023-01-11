@@ -62,6 +62,15 @@ export class SplitService {
     // @ts-ignore. 2nd param is not part of type definitions. Used to overwrite the version of the SDK for correct tracking.
     this.splitio = SplitFactory(config, (modules) => {
       modules.settings.version = VERSION;
+      // Update getEventSource method to add ngsw-bypass parameter to streaming url to bypass angular service workers
+      modules.platform.getEventSource = () => {
+        if (typeof EventSource === 'function')
+          return class CustomEventSource extends EventSource {
+            constructor(url: string, eventSourceInitDict?: any) {
+              super(url+'&ngsw-bypass=true', eventSourceInitDict);
+            }
+          };
+      };
     });
     this.splitClient = this.splitio.client();
     this.splitManager = this.splitio.manager();

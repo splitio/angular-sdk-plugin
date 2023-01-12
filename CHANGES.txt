@@ -1,3 +1,9 @@
+1.0.1 (January 12, 2023)
+- Support angular service workers
+- Updated @splitsoftware/splitio-browserjs package to version 0.9.2, which includes:
+  - Updated some transitive dependencies for vulnerability fixes.
+  - Bugfixing - Upgrade @splitsoftware/splitio-commons package to version 1.7.3 which includes a memory leak fix for localhost mode (Related to issue https://github.com/splitio/javascript-commons/issues/181) among other improvements.
+
 1.0.0 (December 15, 2022)
 - Updated the minimum angular version to match Angular's support up to date. Breaking change version is regarding the angular minimum version update, there are no breaking changes to Split's plugin API or functionality itself.
 

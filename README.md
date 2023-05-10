@@ -31,7 +31,7 @@ export class AppComponent implements OnInit {
         key: 'CUSTOMER_ID'
       }
     }).subscribe(() => {
-      var treatment = this.splitio.getTreatment('SPLIT_NAME');
+      var treatment = this.splitio.getTreatment('FEATURE_FLAG_NAME');
       if (treatment == 'on') {
         // insert code here for on treatment
       } else if (treatment == 'off') {

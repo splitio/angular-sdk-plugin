@@ -1,4 +1,4 @@
-export const mockedSplitView = [
+export const mockedFeatureFlagView = [
   {
     'changeNumber': 0,
     'configs': {},

@@ -2,7 +2,7 @@
 This repository contains utilities for the Angular framework, that integrates with Split JS SDK and offers an integrated experience with the Angular framework
 
 ## Overview
-This utilities are designed to work with Split, the platform for controlled rollouts, which serves features to your users via a Split feature flag to manage your complete customer experience.
+This utilities are designed to work with Split, the platform for controlled rollouts, which serves features to your users via feature flags to manage your complete customer experience.
 
 [![Twitter Follow](https://img.shields.io/twitter/follow/splitsoftware.svg?style=social&label=Follow&maxAge=1529000)](https://twitter.com/intent/follow?screen_name=splitsoftware)
 
@@ -31,7 +31,7 @@ export class AppComponent implements OnInit {
         key: 'CUSTOMER_ID'
       }
     }).subscribe(() => {
-      var treatment = this.splitio.getTreatment('SPLIT_NAME');
+      var treatment = this.splitio.getTreatment('FEATURE_FLAG_NAME');
       if (treatment == 'on') {
         // insert code here for on treatment
       } else if (treatment == 'off') {

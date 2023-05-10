@@ -19,17 +19,17 @@ export const VERSION = 'angular-' + 'ANGULAR_SDK_VERSION_NUMBER';
 export const CONTROL_CLIENT = {
   getTreatment: () => { return CONTROL; },
   getTreatmentWithConfig: () => { return { treatment: CONTROL, config: null }; },
-  getTreatments: (splitNames: string[]) => {
+  getTreatments: (featureFlagNames: string[]) => {
     let result = {};
-    splitNames.forEach((splitName) => {
-      result = { ...result, [splitName]: CONTROL };
+    featureFlagNames.forEach((featureFlagName) => {
+      result = { ...result, [featureFlagName]: CONTROL };
     });
     return result;
   },
-  getTreatmentsWithConfig: (splitNames: string[]) => {
+  getTreatmentsWithConfig: (featureFlagNames: string[]) => {
     let result = {};
-    splitNames.forEach((splitName) => {
-      result = { ...result, [splitName]: { treatment: CONTROL, config: null } };
+    featureFlagNames.forEach((featureFlagName) => {
+      result = { ...result, [featureFlagName]: { treatment: CONTROL, config: null } };
     });
     return result;
   },

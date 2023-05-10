@@ -47,7 +47,7 @@ export class SplitService {
   sdkUpdate$: Observable<string>;
 
   /**
-   * This method initializes the SDK with the required Browser APIKEY
+   * This method initializes the SDK with the required Browser SDK KEY
    * and the 'key' according to the Traffic type set (ex.: an user id).
    * @function init
    * @param {IBrowserSettings} config Should be an object that complies with the SplitIO.IBrowserSettings.
@@ -302,7 +302,7 @@ export class SplitService {
   }
 
   /**
-   * Tracks an event for a shared client to be fed to the results product on Split Webconsole and returns a promise to signal when the event was successfully queued (or not).
+   * Tracks an event for a shared client to be fed to the results product on Split user interface and returns a promise to signal when the event was successfully queued (or not).
    * @function track
    * @param {SplitKey} key - The key that identifies the entity related to this event.
    * @param {string} trafficType - The traffic type of the entity related to this event.
@@ -313,7 +313,7 @@ export class SplitService {
    */
   track(key: SplitIO.SplitKey, trafficType: string, eventType: string, value?: number | undefined, properties?: SplitIO.Properties | undefined): boolean;
   /**
-   * Tracks an event to be fed to the results product on Split Webconsole and returns a promise to signal when the event was successfully queued (or not).
+   * Tracks an event to be fed to the results product on Split user interface and returns a promise to signal when the event was successfully queued (or not).
    * @function track
    * @param {string} trafficType - The traffic type of the entity related to this event.
    * @param {string} eventType - The event type corresponding to this event.
@@ -340,7 +340,7 @@ export class SplitService {
   }
 
   /**
-   * Get the array of splits data in SplitView format.
+   * Get the array of feature flags data in SplitView format.
    * @function getSplits
    * @returns {SplitViews} The list of SplitIO.SplitView.
    */

@@ -27,7 +27,7 @@ export class AppComponent implements OnInit {
     // Subscribe to init to make sure the SDK is properly loaded before asking for a treatment
     this.splitio.init({
       core: {
-        authorizationKey: 'YOUR_SDK_API_KEY',
+        authorizationKey: 'YOUR_SDK_KEY',
         key: 'CUSTOMER_ID'
       }
     }).subscribe(() => {

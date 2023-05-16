@@ -1,4 +1,4 @@
-1.0.2 (May XX, 2023)
+1.0.2 (May 16, 2023)
 - Updated terminology on the SDKs codebase to be more aligned with current standard without causing a breaking change. The core change is the term split for feature flag on things like logs and JSDocs tags.
 
 1.0.1 (Jan 12, 2023)

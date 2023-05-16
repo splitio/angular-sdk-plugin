@@ -1,3 +1,5 @@
+import * as SplitIO from '@splitsoftware/splitio-browserjs/types/splitio';
+
 export function buildInstance(key: SplitIO.SplitKey): string {
   // @ts-ignore
   if (!key.bucketingKey) return key;

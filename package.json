@@ -1,6 +1,6 @@
 {
   "name": "@splitsoftware/splitio-angular",
-  "version": "1.0.2-rc.0",
+  "version": "1.0.2",
   "description": "Split Angular utilities to simplify Split SDK browser client usage",
   "scripts": {
     "ng": "ng",
@@ -53,7 +53,7 @@
     "@angular-eslint/eslint-plugin-template": "13.5.0",
     "@angular-eslint/schematics": "13.5.0",
     "@angular-eslint/template-parser": "13.5.0",
-    "@splitsoftware/splitio-browserjs": "0.9.5-rc.0",
+    "@splitsoftware/splitio-browserjs": "0.9.5",
     "@types/jest": "^27.4.1",
     "@typescript-eslint/eslint-plugin": "5.27.1",
     "@typescript-eslint/parser": "5.27.1",

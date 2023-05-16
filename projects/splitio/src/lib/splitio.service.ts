@@ -47,7 +47,7 @@ export class SplitService {
   sdkUpdate$: Observable<string>;
 
   /**
-   * This method initializes the SDK with the required Browser APIKEY
+   * This method initializes the SDK with the required Browser SDK KEY
    * and the 'key' according to the Traffic type set (ex.: an user id).
    * @function init
    * @param {IBrowserSettings} config Should be an object that complies with the SplitIO.IBrowserSettings.
@@ -217,92 +217,92 @@ export class SplitService {
    * Returns a Treatment value, which is the treatment string for the given feature.
    * @function getTreatment
    * @param {SplitKey} key - The key for the client instance.
-   * @param {string} splitName - The string that represents the split we want to get the treatment.
+   * @param {string} featureFlagName - The string that represents the feature flag we want to get the treatment.
    * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {Treatment} - The treatment string.
    */
-  getTreatment(key: SplitIO.SplitKey, splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.Treatment;
+  getTreatment(key: SplitIO.SplitKey, featureFlagName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.Treatment;
   /**
    * Returns a Treatment value, which is the treatment string for the given feature.
    * @function getTreatment
-   * @param {string} splitName - The string that represents the split we want to get the treatment.
+   * @param {string} featureFlagName - The string that represents the feature flag we want to get the treatment.
    * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {Treatment} - The treatment string.
    */
-  getTreatment(splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.Treatment;
+  getTreatment(featureFlagName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.Treatment;
   getTreatment(param1: string | SplitIO.SplitKey, param2?: string | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.Treatment {
-    const {key, splitNames, attributes} = parseTreatmentParams(param1, param2, param3);
-    return this.getClient(key).getTreatment(splitNames, attributes);
+    const {key, featureFlagNames, attributes} = parseTreatmentParams(param1, param2, param3);
+    return this.getClient(key).getTreatment(featureFlagNames, attributes);
   }
 
   /**
    * Returns a TreatmentWithConfig value, which is an object with both treatment and config string for the given feature.
    * @function getTreatmentWithConfig
    * @param {SplitKey} key - The key for the client instance.
-   * @param {string} splitName - The string that represents the split we want to get the treatment.
+   * @param {string} featureFlagName - The string that represents the feature flag we want to get the treatment.
    * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {TreatmentWithConfig} - The map containing the treatment and the configuration stringified JSON (or null if there was no config for that treatment).
    */
-  getTreatmentWithConfig(key: SplitIO.SplitKey, splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentWithConfig;
+  getTreatmentWithConfig(key: SplitIO.SplitKey, featureFlagName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentWithConfig;
   /**
    * Returns a TreatmentWithConfig value, which is an object with both treatment and config string for the given feature.
    * @function getTreatmentWithConfig
-   * @param {string} splitName - The string that represents the split we want to get the treatment.
+   * @param {string} featureFlagName - The string that represents the feature flag we want to get the treatment.
    * @param {Attributes} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {TreatmentWithConfig} - The map containing the treatment and the configuration stringified JSON (or null if there was no config for that treatment).
    */
-  getTreatmentWithConfig(splitName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentWithConfig;
+  getTreatmentWithConfig(featureFlagName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentWithConfig;
   getTreatmentWithConfig(param1: string | SplitIO.SplitKey, param2?: string | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.TreatmentWithConfig {
-    const {key, splitNames, attributes} = parseTreatmentParams(param1, param2, param3);
-    return this.getClient(key).getTreatmentWithConfig(splitNames, attributes);
+    const {key, featureFlagNames, attributes} = parseTreatmentParams(param1, param2, param3);
+    return this.getClient(key).getTreatmentWithConfig(featureFlagNames, attributes);
   }
 
   /**
    * Returns a Treatments value, which is an object map with the treatments for the given features.
    * @function getTreatments
    * @param {SplitKey} key - The key for the client instance.
-   * @param {Array<string>} splitNames - An array of the split names we want to get the treatments.
+   * @param {Array<string>} featureFlagNames - An array of the feature flag names we want to get the treatments.
    * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {Treatments} - The treatments object map.
    */
-  getTreatments(key: SplitIO.SplitKey, splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.Treatments;
+  getTreatments(key: SplitIO.SplitKey, featureFlagNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.Treatments;
   /**
    * Returns a Treatments value, which is an object map with the treatments for the given features.
    * @function getTreatments\
-   * @param {Array<string>} splitNames - An array of the split names we want to get the treatments.
+   * @param {Array<string>} featureFlagNames - An array of the feature flag names we want to get the treatments.
    * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {Treatments} - The treatments object map.
    */
-  getTreatments(splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.Treatments;
+  getTreatments(featureFlagNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.Treatments;
   getTreatments(param1: string[] | SplitIO.SplitKey, param2?: string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.Treatments {
-    const {key, splitNames, attributes} = parseTreatmentParams(param1, param2, param3);
-    return this.getClient(key).getTreatments(splitNames, attributes);
+    const {key, featureFlagNames, attributes} = parseTreatmentParams(param1, param2, param3);
+    return this.getClient(key).getTreatments(featureFlagNames, attributes);
   }
 
   /**
    * Returns a TreatmentsWithConfig value, which is an object map with the TreatmentWithConfig (an object with both treatment and config string) for the given features.
    * @function getTreatmentsWithConfig
    * @param {SplitKey} key - The key for the client instance.
-   * @param {Array<string>} splitNames - An array of the split names we want to get the treatments.
+   * @param {Array<string>} featureFlagNames - An array of the feature flag names we want to get the treatments.
    * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {TreatmentsWithConfig} The map with all the TreatmentWithConfig objects
    */
-  getTreatmentsWithConfig(key: SplitIO.SplitKey, splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig;
+  getTreatmentsWithConfig(key: SplitIO.SplitKey, featureFlagNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig;
   /**
    * Returns a TreatmentsWithConfig value, which is an object map with the TreatmentWithConfig (an object with both treatment and config string) for the given features.
    * @function getTreatmentsWithConfig
-   * @param {Array<string>} splitNames - An array of the split names we want to get the treatments.
+   * @param {Array<string>} featureFlagNames - An array of the feature flag names we want to get the treatments.
    * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
    * @returns {TreatmentsWithConfig} The map with all the TreatmentWithConfig objects
    */
-  getTreatmentsWithConfig(splitNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig;
+  getTreatmentsWithConfig(featureFlagNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig;
   getTreatmentsWithConfig(param1: string[] | SplitIO.SplitKey, param2?: string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig {
-    const {key, splitNames, attributes} = parseTreatmentParams(param1, param2, param3);
-    return this.getClient(key).getTreatmentsWithConfig(splitNames, attributes);
+    const {key, featureFlagNames, attributes} = parseTreatmentParams(param1, param2, param3);
+    return this.getClient(key).getTreatmentsWithConfig(featureFlagNames, attributes);
   }
 
   /**
-   * Tracks an event for a shared client to be fed to the results product on Split Webconsole and returns a promise to signal when the event was successfully queued (or not).
+   * Tracks an event for a shared client to be fed to the results product on Split user interface and returns a promise to signal when the event was successfully queued (or not).
    * @function track
    * @param {SplitKey} key - The key that identifies the entity related to this event.
    * @param {string} trafficType - The traffic type of the entity related to this event.
@@ -313,7 +313,7 @@ export class SplitService {
    */
   track(key: SplitIO.SplitKey, trafficType: string, eventType: string, value?: number | undefined, properties?: SplitIO.Properties | undefined): boolean;
   /**
-   * Tracks an event to be fed to the results product on Split Webconsole and returns a promise to signal when the event was successfully queued (or not).
+   * Tracks an event to be fed to the results product on Split user interface and returns a promise to signal when the event was successfully queued (or not).
    * @function track
    * @param {string} trafficType - The traffic type of the entity related to this event.
    * @param {string} eventType - The event type corresponding to this event.
@@ -340,7 +340,7 @@ export class SplitService {
   }
 
   /**
-   * Get the array of splits data in SplitView format.
+   * Get the array of feature flags data in SplitView format.
    * @function getSplits
    * @returns {SplitViews} The list of SplitIO.SplitView.
    */
@@ -351,17 +351,17 @@ export class SplitService {
   /**
    * Get the data of a split in SplitView format.
    * @function getSplit
-   * @param {string} splitName The name of the split we wan't to get info of.
+   * @param {string} featureFlagName The name of the feature flag we wan't to get info of.
    * @returns {SplitView} The SplitIO.SplitView of the given split.
    */
-  getSplit(splitName: string): SplitIO.SplitView | null {
-    return this.getManager().split(splitName);
+  getSplit(featureFlagName: string): SplitIO.SplitView | null {
+    return this.getManager().split(featureFlagName);
   }
 
   /**
-   * Get the array of Split names.
+   * Get the array of feature flag names.
    * @function getSplitNames
-   * @returns {SplitNames} The lists of Split names.
+   * @returns {SplitNames} The lists of feature flag names.
    */
   getSplitNames(): SplitIO.SplitNames {
     return this.getManager().names();

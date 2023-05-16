@@ -1,3 +1,5 @@
+import * as SplitIO from '@splitsoftware/splitio-browserjs/types/splitio';
+
 export function buildInstance(key: SplitIO.SplitKey): string {
   // @ts-ignore
   if (!key.bucketingKey) return key;
@@ -6,8 +8,8 @@ export function buildInstance(key: SplitIO.SplitKey): string {
 }
 
 export function parseTreatmentParams(param1: string | string[] | SplitIO.SplitKey, param2?: string | string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): any {
-  if (isString(param2) || Array.isArray(param2)) return { key: param1, splitNames: param2, attributes: param3};
-  return { key: undefined, splitNames: param1, attributes: param2 };
+  if (isString(param2) || Array.isArray(param2)) return { key: param1, featureFlagNames: param2, attributes: param3};
+  return { key: undefined, featureFlagNames: param1, attributes: param2 };
 }
 
 export function parseTrackParams(param1: string | SplitIO.SplitKey, param2: string, param3: number | string | undefined, param4: number | SplitIO.Properties | undefined, param5: SplitIO.Properties | undefined) {

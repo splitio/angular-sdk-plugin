@@ -1,5 +1,5 @@
 import { SplitService } from '../splitio.service';
-import { mockedSplitView } from './mocks/SplitView.mock';
+import { mockedFeatureFlagView } from './mocks/SplitView.mock';
 import { config, localhostConfig } from './testUtils/sdkConfigs';
 
 describe('SplitService', () => {
@@ -253,10 +253,10 @@ describe('SplitService', () => {
     service.init(localhostConfig);
     service.sdkReady$.subscribe(() => {
       // @ts-ignore
-      expect(service.getSplits()).toEqual(mockedSplitView);
-      expect(service.getSplitNames()).toEqual(mockedSplitView.map(split => split.name));
+      expect(service.getSplits()).toEqual(mockedFeatureFlagView);
+      expect(service.getSplitNames()).toEqual(mockedFeatureFlagView.map(split => split.name));
       // @ts-ignore
-      expect(service.getSplit('test_split2')).toEqual(mockedSplitView[1]);
+      expect(service.getSplit('test_split2')).toEqual(mockedFeatureFlagView[1]);
       expect(service.getSplit('nonexistent_split')).toBeNull();
       done();
     });

@@ -1,5 +1,5 @@
 2.0.0 (Dec XX, 2023)
- - Updated the minimum angular version to match Angular's support up to date. Breaking change version is regarding the angular minimum version update, there are no breaking changes to Split's plugin API or functionality itself.
+ - Updated the minimum Angular version to match Angular's support up to date. Breaking change version is regarding the Angular minimum version update, there are no breaking changes to Split's plugin API or functionality itself.
 
 1.0.2 (May 16, 2023)
  - Updated terminology on the SDKs codebase to be more aligned with current standard without causing a breaking change. The core change is the term split for feature flag on things like logs and JSDocs tags.
@@ -11,7 +11,7 @@
     - Bugfixing - Upgrade @splitsoftware/splitio-commons package to version 1.7.3 which includes a memory leak fix for localhost mode (Related to issue https://github.com/splitio/javascript-commons/issues/181) among other improvements.
 
 1.0.0 (Dec 15, 2022)
- - Updated the minimum angular version to match Angular's support up to date. Breaking change version is regarding the angular minimum version update, there are no breaking changes to Split's plugin API or functionality itself.
+ - Updated the minimum Angular version to match Angular's support up to date. Breaking change version is regarding the Angular minimum version update, there are no breaking changes to Split's plugin API or functionality itself.
 
 0.4.0 (Oct 5, 2022)
  - Added a new impressions mode for the SDK called NONE, to be used in factory when there is no desire to capture impressions on an SDK factory to feed Split's analytics engine. Running NONE mode, the SDK will only capture unique keys evaluated for a particular feature flag instead of full blown impressions.

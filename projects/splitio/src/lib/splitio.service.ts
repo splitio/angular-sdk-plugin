@@ -3,7 +3,7 @@ import { SplitFactory } from '@splitsoftware/splitio-browserjs';
 import * as SplitIO from '@splitsoftware/splitio-browserjs/types/splitio';
 import { from, Observable } from 'rxjs';
 import { INIT_CLIENT_EXISTS, INIT_CLIENT_FIRST, CONTROL_CLIENT, DEFAULT_MANAGER, VERSION } from './utils/constants';
-import { buildInstance, parseTrackParams, parseTreatmentParams } from './utils/utils';
+import { buildInstance, parseFlagSetParams, parseTrackParams, parseTreatmentParams } from './utils/utils';
 
 @Injectable({
   providedIn: 'root'
@@ -299,6 +299,94 @@ export class SplitService {
   getTreatmentsWithConfig(param1: string[] | SplitIO.SplitKey, param2?: string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig {
     const {key, featureFlagNames, attributes} = parseTreatmentParams(param1, param2, param3);
     return this.getClient(key).getTreatmentsWithConfig(featureFlagNames, attributes);
+  }
+
+  /**
+   * Returns a Treatments value, which is an object map with the treatments for the given flag set.
+   * @function getTreatmentsByFlagSet
+   * @param {SplitKey} key - The key for the client instance.
+   * @param {string} flagSetName - The string that represents the flag set we want to get the related feature flags and treatments.
+   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
+   * @returns {Treatments} - The treatments object map.
+   */
+  getTreatmentsByFlagSet(key: SplitIO.SplitKey, flagSetName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.Treatments;
+  /**
+   * Returns a Treatments value, which is an object map with the treatments for the given flag set.
+   * @function getTreatmentsByFlagSet
+   * @param {string} flagSetName - The string that represents the flag set we want to get the related feature flags and treatments.
+   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
+   * @returns {Treatments} - The treatments object map.
+   */
+  getTreatmentsByFlagSet(flagSetName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.Treatments;
+  getTreatmentsByFlagSet(param1: string | SplitIO.SplitKey, param2?: string | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.Treatments {
+    const {key, flagSetNames, attributes} = parseFlagSetParams(param1, param2, param3);
+    return this.getClient(key).getTreatmentsByFlagSet(flagSetNames, attributes);
+  }
+
+  /**
+   * Returns a TreatmentsWithConfig value, which is an object map with the TreatmentWithConfig (an object with both treatment and config string) for the given flag set.
+   * @function getTreatmentsWithConfigByFlagSet
+   * @param {SplitKey} key - The key for the client instance.
+   * @param {string} flagSetName - The string that represents the flag set we want to get the related feature flags and treatments.
+   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
+   * @returns {TreatmentsWithConfig} The map with all the TreatmentWithConfig objects
+   */
+  getTreatmentsWithConfigByFlagSet(key: SplitIO.SplitKey, flagSetName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig;
+  /**
+   * Returns a TreatmentsWithConfig value, which is an object map with the TreatmentWithConfig (an object with both treatment and config string) for the given flag set.
+   * @function getTreatmentsWithConfigByFlagSet
+   * @param {string} flagSetName - The string that represents the flag set we want to get the related feature flags and treatments.
+   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
+   * @returns {TreatmentsWithConfig} The map with all the TreatmentWithConfig objects
+   */
+  getTreatmentsWithConfigByFlagSet(flagSetName: string, attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig;
+  getTreatmentsWithConfigByFlagSet(param1: string | SplitIO.SplitKey, param2?: string | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig {
+    const {key, flagSetNames, attributes} = parseFlagSetParams(param1, param2, param3);
+    return this.getClient(key).getTreatmentsWithConfigByFlagSet(flagSetNames, attributes);
+  }
+
+  /**
+   * Returns a Treatments value, which is an object map with the treatments for the given flag sets.
+   * @function getTreatmentsByFlagSets
+   * @param {SplitKey} key - The key for the client instance.
+   * @param {Array<string>} flagSetNames - An array of the flag set names we want to get the related feature flags and treatments.
+   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
+   * @returns {Treatments} - The treatments object map.
+   */
+  getTreatmentsByFlagSets(key: SplitIO.SplitKey, flagSetNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.Treatments;
+  /**
+   * Returns a Treatments value, which is an object map with the treatments for the given flag sets.
+   * @function getTreatmentsByFlagSets
+   * @param {Array<string>} flagSetNames - An array of the flag set names we want to get the related feature flags and treatments.
+   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
+   * @returns {Treatments} - The treatments object map.
+   */
+  getTreatmentsByFlagSets(flagSetNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.Treatments;
+  getTreatmentsByFlagSets(param1: string[] | SplitIO.SplitKey, param2?: string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.Treatments {
+    const {key, flagSetNames, attributes} = parseFlagSetParams(param1, param2, param3);
+    return this.getClient(key).getTreatmentsByFlagSets(flagSetNames, attributes);
+  }
+
+  /**
+   * Returns a TreatmentsWithConfig value, which is an object map with the TreatmentWithConfig (an object with both treatment and config string) for the given flag sets.
+   * @function getTreatmentsWithConfigByFlagSets
+   * @param {SplitKey} key - The key for the client instance.
+   * @param {Array<string>} flagSetNames - An array of the flag set names we want to get the related feature flags and treatments.
+   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
+   * @returns {TreatmentsWithConfig} The map with all the TreatmentWithConfig objects
+   */
+  getTreatmentsWithConfigByFlagSets(key: SplitIO.SplitKey, flagSetNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig;
+  /**
+   * Returns a TreatmentsWithConfig value, which is an object map with the TreatmentWithConfig (an object with both treatment and config string) for the given flag sets.
+   * @function getTreatmentsWithConfigByFlagSets
+   * @param {Array<string>} flagSetNames - An array of the flag set names we want to get the related feature flags and treatments.
+   * @param {Attributes=} attributes - An object of type Attributes defining the attributes for the given key.
+   * @returns {TreatmentsWithConfig} The map with all the TreatmentWithConfig objects
+   */
+  getTreatmentsWithConfigByFlagSets(flagSetNames: string[], attributes?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig;
+  getTreatmentsWithConfigByFlagSets(param1: string[] | SplitIO.SplitKey, param2?: string[] | SplitIO.Attributes | undefined, param3?: SplitIO.Attributes | undefined): SplitIO.TreatmentsWithConfig {
+    const {key, flagSetNames, attributes} = parseFlagSetParams(param1, param2, param3);
+    return this.getClient(key).getTreatmentsWithConfigByFlagSets(flagSetNames, attributes);
   }
 
   /**

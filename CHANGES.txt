@@ -1,5 +1,6 @@
 2.0.0 (Dec XX, 2023)
  - Updated the minimum Angular version to match Angular's support up to date. Breaking change version is regarding the Angular minimum version update, there are no breaking changes to Split's plugin API or functionality itself.
+ - Updated @splitsoftware/splitio-browserjs package to version 0.12.0
 
 1.0.2 (May 16, 2023)
  - Updated terminology on the SDKs codebase to be more aligned with current standard without causing a breaking change. The core change is the term split for feature flag on things like logs and JSDocs tags.

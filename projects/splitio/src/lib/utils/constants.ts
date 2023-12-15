@@ -33,10 +33,10 @@ export const CONTROL_CLIENT = {
     });
     return result;
   },
-  getTreatmentsByFlagSet: () => { return []; },
-  getTreatmentsWithConfigByFlagSet: () => { return []; },
-  getTreatmentsByFlagSets: () => { return []; },
-  getTreatmentsWithConfigByFlagSets: () => { return []; },
+  getTreatmentsByFlagSet: () => { return {}; },
+  getTreatmentsWithConfigByFlagSet: () => { return {}; },
+  getTreatmentsByFlagSets: () => { return {}; },
+  getTreatmentsWithConfigByFlagSets: () => { return {}; },
   track: () => { return false; }
 };
 

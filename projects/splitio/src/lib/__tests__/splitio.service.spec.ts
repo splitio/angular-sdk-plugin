@@ -250,6 +250,23 @@ describe('SplitService', () => {
 
   test('Flag sets', (done) => {
     expect(service.isSDKReady).toEqual(false);
+
+    expect(service.getTreatmentsByFlagSet('set_a')).toEqual({});
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] plugin should be initialized');
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client should be initialized first.');
+
+    expect(service.getTreatmentsWithConfigByFlagSet('set_a')).toEqual({});
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] plugin should be initialized');
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client should be initialized first.');
+
+    expect(service.getTreatmentsByFlagSets(['set_a','set_b'])).toEqual({});
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] plugin should be initialized');
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client should be initialized first.');
+
+    expect(service.getTreatmentsWithConfigByFlagSets(['set_a','set_b'])).toEqual({});
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] plugin should be initialized');
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client should be initialized first.');
+
     service.init(localhostConfig).subscribe(() => {
 
       const mainClient = service.getSDKClient();

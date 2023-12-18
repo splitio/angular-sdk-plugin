@@ -248,6 +248,50 @@ describe('SplitService', () => {
     });
   });
 
+  test('Flag sets', (done) => {
+    expect(service.isSDKReady).toEqual(false);
+
+    expect(service.getTreatmentsByFlagSet('set_a')).toEqual({});
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] plugin should be initialized');
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client should be initialized first.');
+
+    expect(service.getTreatmentsWithConfigByFlagSet('set_a')).toEqual({});
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] plugin should be initialized');
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client should be initialized first.');
+
+    expect(service.getTreatmentsByFlagSets(['set_a','set_b'])).toEqual({});
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] plugin should be initialized');
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client should be initialized first.');
+
+    expect(service.getTreatmentsWithConfigByFlagSets(['set_a','set_b'])).toEqual({});
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] plugin should be initialized');
+    expect(logSpy.mock.calls[logCalls++][0]).toEqual('[ERROR] client should be initialized first.');
+
+    service.init(localhostConfig).subscribe(() => {
+
+      const mainClient = service.getSDKClient();
+      expect(service.isSDKReady).toEqual(true);
+
+      const clientSpy = {
+        getTreatmentsByFlagSet: jest.spyOn(mainClient, 'getTreatmentsByFlagSet'),
+        getTreatmentsWithConfigByFlagSet: jest.spyOn(mainClient, 'getTreatmentsWithConfigByFlagSet'),
+        getTreatmentsByFlagSets: jest.spyOn(mainClient, 'getTreatmentsByFlagSets'),
+        getTreatmentsWithConfigByFlagSets: jest.spyOn(mainClient, 'getTreatmentsWithConfigByFlagSets'),
+      };
+
+      service.getTreatmentsByFlagSet('set_a');
+      expect(clientSpy.getTreatmentsByFlagSet.mock.calls[0]).toEqual(['set_a', undefined]);
+      service.getTreatmentsWithConfigByFlagSet('set_a', {attr: true});
+      expect(clientSpy.getTreatmentsWithConfigByFlagSet.mock.calls[0]).toEqual(['set_a', {attr: true}]);
+      service.getTreatmentsByFlagSets(['set_a','set_b'], {attr: true});
+      expect(clientSpy.getTreatmentsByFlagSets.mock.calls[0]).toEqual([['set_a','set_b'], {attr: true}]);
+      service.getTreatmentsWithConfigByFlagSets(['set_a','set_b']);
+      expect(clientSpy.getTreatmentsWithConfigByFlagSets.mock.calls[0]).toEqual([['set_a','set_b'], undefined]);
+
+      done();
+    });
+  });
+
   test('SDK Manager', (done) => {
     expect(service.getSplitNames()).toEqual([]);
     service.init(localhostConfig);

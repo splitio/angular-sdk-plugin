@@ -3,10 +3,11 @@ export const mockedFeatureFlagView = [
     'changeNumber': 0,
     'configs': {},
     'killed': false,
-    'name':
-    'test_split',
+    'name': 'test_split',
     'trafficType': 'localhost',
-    'treatments': ['on']
+    'treatments': ['on'],
+    'defaultTreatment': 'control',
+    'sets': []
   },
   {
     'changeNumber': 0,
@@ -14,9 +15,10 @@ export const mockedFeatureFlagView = [
       'off': '{"bannerText":"Click here."}'
     },
     'killed': false,
-    'name':
-    'test_split2',
+    'name': 'test_split2',
     'trafficType': 'localhost',
-    'treatments': ['off']
+    'treatments': ['off'],
+    'defaultTreatment': 'control',
+    'sets': []
   }
 ];

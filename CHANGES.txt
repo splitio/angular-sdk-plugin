@@ -1,5 +1,13 @@
 2.0.0 (Dec XX, 2023)
+ - Updated @splitsoftware/splitio-browserjs package to version 0.13.0
  - Updated the minimum Angular version to match Angular's support up to date. Breaking change version is regarding the Angular minimum version update, there are no breaking changes to Split's plugin API or functionality itself.
+ - Added support for Flag Sets on the SDK, which enables grouping feature flags and interacting with the group rather than individually (more details in our documentation):
+ - Added new variations of the get treatment methods to support evaluating flags in given flag set/s.
+    - getTreatmentsByFlagSet and getTreatmentsByFlagSets
+    - getTreatmentsWithConfigByFlagSets and getTreatmentsWithConfigByFlagSets
+ - Added a new optional Split Filter configuration option. This allows the SDK and Split services to only synchronize the flags in the specified flag sets, avoiding unused or unwanted flags from being synced on the SDK instance, bringing all the benefits from a reduced payload.
+ - Added `sets` property to the `SplitView` object returned by the `split` and `splits` methods of the SDK manager to expose flag sets on flag views.
+ - Added `defaultTreatment` property to the `SplitView` object returned by the `split` and `splits` methods of the SDK manager (Related to issue https://github.com/splitio/javascript-commons/issues/225).
 
 1.0.2 (May 16, 2023)
  - Updated terminology on the SDKs codebase to be more aligned with current standard without causing a breaking change. The core change is the term split for feature flag on things like logs and JSDocs tags.

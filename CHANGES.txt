@@ -1,6 +1,9 @@
+2.0.1 (Mar 11, 2024)
+ - Updated some transitive dependencies for vulnerability fixes.
+
 2.0.0 (Dec 18, 2023)
+ - BREAKING CHANGE: Updated the minimum Angular version to match Angular's support up to date. Breaking change version is regarding the Angular minimum version update, there are no breaking changes to Split's plugin API or functionality itself.
  - Updated @splitsoftware/splitio-browserjs package to version 0.13.0
- - Updated the minimum Angular version to match Angular's support up to date. Breaking change version is regarding the Angular minimum version update, there are no breaking changes to Split's plugin API or functionality itself.
  - Added support for Flag Sets on the SDK, which enables grouping feature flags and interacting with the group rather than individually (more details in our documentation):
  - Added new variations of the get treatment methods to support evaluating flags in given flag set/s.
     - getTreatmentsByFlagSet and getTreatmentsByFlagSets

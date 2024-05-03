@@ -7,7 +7,7 @@ This utilities are designed to work with Split, the platform for controlled roll
 [![Twitter Follow](https://img.shields.io/twitter/follow/splitsoftware.svg?style=social&label=Follow&maxAge=1529000)](https://twitter.com/intent/follow?screen_name=splitsoftware)
 
 ## Compatibility
-This SDK is compatible with Angular 13.3.0 and above.
+This SDK is compatible with Angular 15.2.1 and above.
 
 ## Getting started
 Below is a simple example that describes the instantiation and most basic usage of our SDK:

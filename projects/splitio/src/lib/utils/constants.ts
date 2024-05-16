@@ -1,7 +1,7 @@
 /**
  * Angular utilities version number
  */
-const ANGULAR_SDK_VERSION_NUMBER = '2.0.2-rc.0'
+const ANGULAR_SDK_VERSION_NUMBER = '2.0.2-rc.0';
 /**
  * SDK constant for control treatment
  */

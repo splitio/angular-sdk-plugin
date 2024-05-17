@@ -1,14 +1,21 @@
 {
   "root": true,
-  "ignorePatterns": ["dist", "coverage"],
+  "ignorePatterns": [
+    "dist",
+    "coverage"
+  ],
   "parserOptions": {
     "ecmaVersion": 2020
   },
   "overrides": [
     {
-      "files": ["*.ts"],
+      "files": [
+        "*.ts"
+      ],
       "parserOptions": {
-        "project": ["tsconfig.json"],
+        "project": [
+          "tsconfig.json"
+        ],
         "createDefaultProgram": true
       },
       "extends": [
@@ -21,18 +28,48 @@
         "@typescript-eslint/ban-ts-comment": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-unused-vars": "error",
-        "indent": ["error", 2, {"SwitchCase": 1}],
-        "quotes": ["warn", "single", "avoid-escape"],
-        "linebreak-style": ["error", "unix"],
-        "semi": ["error", "always"],
+        "indent": [
+          "error",
+          2,
+          {
+            "SwitchCase": 1
+          }
+        ],
+        "quotes": [
+          "warn",
+          "single",
+          "avoid-escape"
+        ],
+        "linebreak-style": [
+          "error",
+          "unix"
+        ],
+        "semi": [
+          "error",
+          "always"
+        ],
         "no-underscore-dangle": "off",
-        "eqeqeq": ["error", "smart"],
+        "eqeqeq": [
+          "error",
+          "smart"
+        ],
         "no-unused-expressions": "off",
-        "new-cap" : "off",
+        "new-cap": "off",
         "no-mixed-requires": "off",
-        "camelcase": ["error", {"properties": "never"}],
-        "no-use-before-define": ["error", "nofunc"],
-        "eol-last": ["error", "always"],
+        "camelcase": [
+          "error",
+          {
+            "properties": "never"
+          }
+        ],
+        "no-use-before-define": [
+          "error",
+          "nofunc"
+        ],
+        "eol-last": [
+          "error",
+          "always"
+        ],
         "no-unused-vars": "off",
         "keyword-spacing": "error",
         "comma-style": "error"

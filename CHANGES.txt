@@ -1,10 +1,3 @@
-3.0.0 (May 17, 2024)
- - BREAKING CHANGE: Updated the minimum Angular version to match Angular's support up to date. Breaking change version is regarding the Angular minimum version update, there are no breaking changes to Split's plugin API or functionality itself.
- - Updated @splitsoftware/splitio-browserjs package to version 0.14.0 that includes:
-    - Added support for targeting rules based on semantic versions (https://semver.org/).
-    - Added special impression label "targeting rule type unsupported by sdk" when the matcher type is not supported by the SDK, which returns 'control' treatment.
-    - Updated Split API client to include the flags spec version query parameter for the `splitChanges` and `auth` endpoints.
-
 2.0.1 (Mar 11, 2024)
  - Updated some transitive dependencies for vulnerability fixes.
 

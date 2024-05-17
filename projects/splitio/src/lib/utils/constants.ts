@@ -1,8 +1,4 @@
 /**
- * Angular utilities version number
- */
-const ANGULAR_SDK_VERSION_NUMBER = '3.0.0';
-/**
  * SDK constant for control treatment
  */
 export const CONTROL = 'control';
@@ -15,7 +11,7 @@ export const INIT_CLIENT_EXISTS = 'init::clientExists';
  */
 export const INIT_CLIENT_FIRST = 'init::clientFirst';
 
-export const VERSION = 'angular-' + ANGULAR_SDK_VERSION_NUMBER;
+export const VERSION = 'angular-' + 'ANGULAR_SDK_VERSION_NUMBER';
 
 /**
  * client with methods that return default values

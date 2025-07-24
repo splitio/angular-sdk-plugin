@@ -13,11 +13,11 @@ export class SplitService {
   /**
    * The local reference to the Split SDK.
    */
-  private splitio: SplitIO.ISDK | undefined;
+  private splitio: SplitIO.IBrowserSDK | undefined;
   /**
    * The local reference to the Split SDK's Client.
    */
-  private splitClient: SplitIO.IClient;
+  private splitClient: SplitIO.IBrowserClient;
   /**
    * The local reference to the Split SDK's Manager.
    */
@@ -25,7 +25,7 @@ export class SplitService {
   /**
    * Map of intialized clients
    */
-  private clientsMap: Map<string, SplitIO.IClient> = new Map<string, SplitIO.IClient>();
+  private clientsMap: Map<string, SplitIO.IBrowserClient> = new Map<string, SplitIO.IBrowserClient>();
   /**
    * Map of events status of intialized clients
    */
@@ -37,7 +37,7 @@ export class SplitService {
   /**
    * Factory config
    */
-  private config: SplitIO.IBrowserSettings;
+  private config: SplitIO.IClientSideSettings;
   /**
    * SDK events observables
    */
@@ -50,10 +50,10 @@ export class SplitService {
    * This method initializes the SDK with the required Browser SDK KEY
    * and the 'key' according to the Traffic type set (ex.: an user id).
    * @function init
-   * @param {IBrowserSettings} config Should be an object that complies with the SplitIO.IBrowserSettings.
+   * @param {IClientSideSettings} config Should be an object that complies with the SplitIO.IClientSideSettings.
    * @returns {Observable<string>} Returns when sdk is ready
    */
-  init(config: SplitIO.IBrowserSettings): Observable<string> {
+  init(config: SplitIO.IClientSideSettings): Observable<string> {
     if (this.splitio) {
       console.log('[ERROR] There is another instance of the SDK.');
       return new Observable(observer => observer.error(INIT_CLIENT_EXISTS));
@@ -184,9 +184,9 @@ export class SplitService {
   /**
    * Returns the SDK client
    * @param {SplitKey=} key The key for the client instance.
-   * @returns {IClient} split client.
+   * @returns {IBrowserClient} split client.
    */
-  getSDKClient(key?: SplitIO.SplitKey): SplitIO.IClient | undefined {
+  getSDKClient(key?: SplitIO.SplitKey): SplitIO.IBrowserClient | undefined {
     if (!this.isInitialized()) return undefined;
     key = key ? key : this.config.core.key;
     return this.clientsMap.get(buildInstance(key));
@@ -194,9 +194,9 @@ export class SplitService {
 
   /**
    * Returns the SDK factory
-   * @returns {ISDK} split factory
+   * @returns {IBrowserSDK} split factory
    */
-  getSDKFactory(): SplitIO.ISDK | undefined {
+  getSDKFactory(): SplitIO.IBrowserSDK | undefined {
     if (!this.isInitialized()) return undefined;
     return this.splitio;
   }
@@ -479,7 +479,7 @@ export class SplitService {
    * @param response
    * @returns Observable<any>
    */
-  private toObservable(key: SplitIO.SplitKey, client: SplitIO.IClient, event: string, isOneTimeEvent = true): Observable<string> {
+  private toObservable(key: SplitIO.SplitKey, client: SplitIO.IBrowserClient, event: string, isOneTimeEvent = true): Observable<string> {
     const eventKey = buildInstance(key) + event;
     if (isOneTimeEvent) {
       return new Observable(subscriber => {

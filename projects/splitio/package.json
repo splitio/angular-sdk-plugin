@@ -1,6 +1,6 @@
 {
   "name": "@splitsoftware/splitio-angular",
-  "version": "3.0.0",
+  "version": "3.0.1-rc.0",
   "description": "Split Angular utilities to simplify Split SDK browser client usage",
   "repository": {
     "type": "git",

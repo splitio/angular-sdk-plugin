@@ -144,12 +144,12 @@ describe('SplitService', () => {
 
       service.getTreatment('test_split');
       expect(clientSpy.getTreatment.mock.calls[0]).toEqual(['test_split', undefined]);
-      service.getTreatmentWithConfig('test_split', {attr: true});
-      expect(clientSpy.getTreatmentWithConfig.mock.calls[0]).toEqual(['test_split', {attr: true}]);
-      service.getTreatments(['test_split','test_split2'], {attr: true});
-      expect(clientSpy.getTreatments.mock.calls[0]).toEqual([['test_split','test_split2'], {attr: true}]);
+      service.getTreatmentWithConfig('test_split', {attr: true}, {properties: { enabled: true }});
+      expect(clientSpy.getTreatmentWithConfig.mock.calls[0]).toEqual(['test_split', {attr: true}, {properties: { enabled: true }}]);
+      service.getTreatments(['test_split','test_split2'], {attr: true}, {properties: { enabled: true }});
+      expect(clientSpy.getTreatments.mock.calls[0]).toEqual([['test_split','test_split2'], {attr: true}, {properties: { enabled: true }}]);
       service.getTreatmentsWithConfig(['test_split','test_split2']);
-      expect(clientSpy.getTreatmentsWithConfig.mock.calls[0]).toEqual([['test_split','test_split2'], undefined]);
+      expect(clientSpy.getTreatmentsWithConfig.mock.calls[0]).toEqual([['test_split','test_split2']]);
 
       const sharedClientKey = 'myKey2';
       // initialize shared client and wait for ready
@@ -208,28 +208,28 @@ describe('SplitService', () => {
         expect(sharedClientSpy.getTreatmentsWithConfig).toHaveBeenCalledTimes(0);
 
         // verify that main client is not evaluating when evaluates for shared client
-        expect(service.getTreatment(sharedClientKey, 'test_split', {attr: true})).toEqual('on');
-        expect(sharedClientSpy.getTreatment.mock.calls[0]).toEqual(['test_split', {attr: true}]);
+        expect(service.getTreatment(sharedClientKey, 'test_split', {attr: true}, { properties: { enabled: true }})).toEqual('on');
+        expect(sharedClientSpy.getTreatment.mock.calls[0]).toEqual(['test_split', {attr: true}, { properties: { enabled: true }}]);
         expect(clientSpy.getTreatment).toHaveBeenCalledTimes(1);
-
-        expect(service.getTreatmentWithConfig(sharedClientKey, 'test_split', {attr: true})).toEqual({treatment: 'on', config: null});
-        expect(sharedClientSpy.getTreatmentWithConfig.mock.calls[0]).toEqual(['test_split', {attr: true}]);
+          
+        expect(service.getTreatmentWithConfig(sharedClientKey, 'test_split', {attr: true}, { properties: { enabled: true }})).toEqual({treatment: 'on', config: null});
+        expect(sharedClientSpy.getTreatmentWithConfig.mock.calls[0]).toEqual(['test_split', {attr: true}, { properties: { enabled: true }}]);
         expect(clientSpy.getTreatmentWithConfig).toHaveBeenCalledTimes(1);
 
-        expect(service.getTreatments(sharedClientKey, ['test_split','test_split2'], {attr: true}))
+        expect(service.getTreatments(sharedClientKey, ['test_split','test_split2'], {attr: true}, { properties: { enabled: true }}))
           .toEqual({
             'test_split': 'on',
             'test_split2': 'off'
           });
-        expect(sharedClientSpy.getTreatments.mock.calls[0]).toEqual([['test_split','test_split2'], {attr: true}]);
+        expect(sharedClientSpy.getTreatments.mock.calls[0]).toEqual([['test_split','test_split2'], {attr: true}, { properties: { enabled: true }}]);
         expect(clientSpy.getTreatments).toHaveBeenCalledTimes(1);
 
-        expect(service.getTreatmentsWithConfig(sharedClientKey, ['test_split','test_split2'], {attr: true}))
+        expect(service.getTreatmentsWithConfig(sharedClientKey, ['test_split','test_split2'], {attr: true}, { properties: { enabled: true }}))
           .toEqual({
             test_split: { treatment: 'on', config: null },
             test_split2: { treatment: 'off', config: '{"bannerText":"Click here."}' }
           });
-        expect(sharedClientSpy.getTreatmentsWithConfig.mock.calls[0]).toEqual([['test_split','test_split2'], {attr: true}]);
+        expect(sharedClientSpy.getTreatmentsWithConfig.mock.calls[0]).toEqual([['test_split','test_split2'], {attr: true}, { properties: { enabled: true }}]);
         expect(clientSpy.getTreatmentsWithConfig).toHaveBeenCalledTimes(1);
 
         // input validation
@@ -281,10 +281,10 @@ describe('SplitService', () => {
 
       service.getTreatmentsByFlagSet('set_a');
       expect(clientSpy.getTreatmentsByFlagSet.mock.calls[0]).toEqual(['set_a', undefined]);
-      service.getTreatmentsWithConfigByFlagSet('set_a', {attr: true});
-      expect(clientSpy.getTreatmentsWithConfigByFlagSet.mock.calls[0]).toEqual(['set_a', {attr: true}]);
-      service.getTreatmentsByFlagSets(['set_a','set_b'], {attr: true});
-      expect(clientSpy.getTreatmentsByFlagSets.mock.calls[0]).toEqual([['set_a','set_b'], {attr: true}]);
+      service.getTreatmentsWithConfigByFlagSet('set_a', {attr: true}, { properties: {enabled: true}});
+      expect(clientSpy.getTreatmentsWithConfigByFlagSet.mock.calls[0]).toEqual(['set_a', {attr: true}, { properties: {enabled: true}}]);
+      service.getTreatmentsByFlagSets(['set_a','set_b'], {attr: true}, { properties: {enabled: true}});
+      expect(clientSpy.getTreatmentsByFlagSets.mock.calls[0]).toEqual([['set_a','set_b'], {attr: true}, { properties: {enabled: true}}]);
       service.getTreatmentsWithConfigByFlagSets(['set_a','set_b']);
       expect(clientSpy.getTreatmentsWithConfigByFlagSets.mock.calls[0]).toEqual([['set_a','set_b'], undefined]);
 

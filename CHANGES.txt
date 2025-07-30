@@ -1,4 +1,4 @@
-4.0.0 (Jul XX, 2025)
+4.0.0 (Jul 30, 2025)
  - BREAKING CHANGE: 
     - Updated the minimum Angular version to match Angular's support up to date. Dropped support for Angular versions below 18.0.0. Updated the minimum supported Angular version to 18.0.0.
     - Renamed some TypeScript definitions in the `SplitIO` namespace to avoid conflicts with other Split packages: `IBrowserSettings`, `ISDK`, and `IClient` were renamed to `IClientSideSettings`, `IBrowserSDK`, and `IBrowserClient` respectively.

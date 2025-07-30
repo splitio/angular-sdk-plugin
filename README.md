@@ -12,7 +12,7 @@ These utilities are designed to work with Split, the platform for controlled rol
 
 ## Compatibility
 
-This SDK is compatible with Angular 18.2.0 and above.
+This SDK is compatible with Angular 18.0.0 and above.
 
 ## Getting started
 

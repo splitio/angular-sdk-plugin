@@ -1,5 +1,17 @@
+4.0.0 (Jul XX, 2025)
+ - BREAKING CHANGE: 
+    - Updated the minimum Angular version to match Angular's support up to date. Dropped support for Angular versions below 18.0.0. Updated the minimum supported Angular version to 18.0.0.
+    - Renamed some TypeScript definitions in the `SplitIO` namespace to avoid conflicts with other Split packages: `IBrowserSettings`, `ISDK`, and `IClient` were renamed to `IClientSideSettings`, `IBrowserSDK`, and `IBrowserClient` respectively.
+    - Dropped support for Split Proxy below version 5.9.0. The SDK now requires Split Proxy 5.9.0 or above.
+    - Removed the `LocalhostFromObject` export from the default import (`import { LocalhostFromObject } from '@splitsoftware/splitio-angular'`). It is no longer necessary to manually import and configure it in the `sync.localhostMode` option to enable localhost mode.
+ - Updated @splitsoftware/splitio-browserjs package to version 1.3.1 that includes:
+    - Added support for rule-based segments. These segments determine membership at runtime by evaluating their configured rules against the user attributes provided to the SDK.
+    - Added support for feature flag prerequisites. This allows customers to define dependency conditions between flags, which are evaluated before any allowlists or targeting rules.
+    - Added a new optional argument to the client `getTreatment` methods to allow passing additional evaluation options, such as a map of properties to append to the generated impressions sent to Split backend. Read more in our docs.
+    - Added support for the new impressions tracking toggle available on feature flags, both respecting the setting and including the new field being returned on `SplitView` type objects. Read more in our docs.
+
 3.0.0 (May 17, 2024)
- - BREAKING CHANGE: Updated the minimum Angular version to match Angular's support up to date. Breaking change version is regarding the Angular minimum version update, there are no breaking changes to Split's plugin API or functionality itself.
+ - BREAKING CHANGE: Updated the minimum Angular version to match Angular's support up to date. Breaking change version is regarding the Angular minimum version update, there are no breaking changes to Split's plugin API or functionality itself. Dropped support for Angular versions below 16.0.0. Updated the minimum supported Angular version to 16.0.0.
  - Updated @splitsoftware/splitio-browserjs package to version 0.14.0 that includes:
     - Added support for targeting rules based on semantic versions (https://semver.org/).
     - Added special impression label "targeting rule type unsupported by sdk" when the matcher type is not supported by the SDK, which returns 'control' treatment.
@@ -9,7 +21,7 @@
  - Updated some transitive dependencies for vulnerability fixes.
 
 2.0.0 (Dec 18, 2023)
- - BREAKING CHANGE: Updated the minimum Angular version to match Angular's support up to date. Breaking change version is regarding the Angular minimum version update, there are no breaking changes to Split's plugin API or functionality itself.
+ - BREAKING CHANGE: Updated the minimum Angular version to match Angular's support up to date. Breaking change version is regarding the Angular minimum version update, there are no breaking changes to Split's plugin API or functionality itself. Dropped support for Angular versions below 15.0.0. Updated the minimum supported Angular version to 15.0.0.
  - Updated @splitsoftware/splitio-browserjs package to version 0.13.0
  - Added support for Flag Sets on the SDK, which enables grouping feature flags and interacting with the group rather than individually (more details in our documentation):
  - Added new variations of the get treatment methods to support evaluating flags in given flag set/s.

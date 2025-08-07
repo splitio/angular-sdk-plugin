@@ -4,9 +4,11 @@ export const mockedFeatureFlagView = [
     'configs': {},
     'killed': false,
     'name': 'test_split',
+    'prerequisites': [],
     'trafficType': 'localhost',
     'treatments': ['on'],
     'defaultTreatment': 'control',
+    'impressionsDisabled': false,
     'sets': []
   },
   {
@@ -16,9 +18,11 @@ export const mockedFeatureFlagView = [
     },
     'killed': false,
     'name': 'test_split2',
+    'prerequisites': [],
     'trafficType': 'localhost',
     'treatments': ['off'],
     'defaultTreatment': 'control',
+    'impressionsDisabled': false,
     'sets': []
   }
 ];

@@ -1,8 +1,8 @@
-# Split Angular plugin
+# Split Angular SDK
 
 [![npm version](https://badge.fury.io/js/%40splitsoftware%2Fsplitio-angular.svg)](https://badge.fury.io/js/%40splitsoftware%2Fsplitio-angular) [![Build Status](https://github.com/splitio/angular-sdk-plugin/actions/workflows/ci.yml/badge.svg)](https://github.com/splitio/angular-sdk-plugin/actions/workflows/ci.yml)
 
-This repository contains utilities for the Angular framework, that integrates with Split JS SDK and offers an integrated experience with the Angular framework
+This repository contains utilities for the Angular framework that integrate with Split JS SDK and offer a seamless experience with modern Angular applications.
 
 ## Overview
 
@@ -14,9 +14,63 @@ These utilities are designed to work with Split, the platform for controlled rol
 
 This SDK is compatible with Angular 18.0.0 and above.
 
-## Getting started
+## Quick Start (Provider Pattern - v4.1.0+)
 
-Below is a simple example that describes the instantiation and most basic usage of our SDK:
+The recommended way to use Split.io with Angular uses provider functions for better integration:
+
+```typescript
+// main.ts
+import { bootstrapApplication } from '@angular/platform-browser';
+import { provideSplitIo, withConfig } from '@splitsoftware/splitio-angular';
+import { AppComponent } from './app/app.component';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideSplitIo(
+      withConfig({
+        core: {
+          authorizationKey: 'YOUR_SDK_KEY',
+          key: 'CUSTOMER_ID'
+        },
+        autoInit: true
+      })
+    )
+  ]
+});
+```
+
+```typescript
+// app.component.ts
+import { Component, OnInit } from '@angular/core';
+import { SplitIoService } from '@splitsoftware/splitio-angular';
+
+@Component({
+  selector: 'app-root',
+  template: `
+    <div *ngIf="splitService.isReady$ | async">
+      <h1>Welcome to Split.io Angular!</h1>
+      <p *ngIf="isFeatureEnabled">Feature is enabled!</p>
+    </div>
+  `
+})
+export class AppComponent implements OnInit {
+  isFeatureEnabled = false;
+
+  constructor(public splitService: SplitIoService) {}
+
+  ngOnInit() {
+    this.splitService.isReady$.subscribe(ready => {
+      if (ready) {
+        const treatment = this.splitService.getTreatment('FEATURE_FLAG_NAME');
+        this.isFeatureEnabled = treatment === 'on';
+      }
+    });
+  }
+}
+```
+
+## Legacy Usage (Still Supported)
+
 ```javascript
 // Import the Service
 import { SplitService } from '@splitsoftware/splitio-angular';
@@ -49,6 +103,155 @@ export class AppComponent implements OnInit {
   }
 }
 ```
+
+## Features
+
+### Provider Pattern (v4.1.0+)
+- **Auto-initialization**: SDK initializes automatically on app bootstrap
+- **Provider Functions**: Use `provideSplitIo()` with Angular patterns
+- **Feature Functions**: Configure with `withConfig()`, `withFeatureOptions()`
+- **Functional Guards**: Guard functions for route protection
+- **TypeScript First**: Enhanced type safety and better IntelliSense
+
+### Route Guards
+- `splitIoReadyGuard` - Ensure SDK is ready before route activation
+- `createTreatmentGuard(flag, treatment)` - Route protection based on feature flags
+- `createMultiTreatmentGuard(checks)` - Complex multi-flag route protection
+
+### Reactive State Management
+
+**Observables**:
+- `isReady$` - SDK ready state
+- `isReadyFromCache$` - Cache ready state  
+- `isTimedOut$` - Timeout state
+- `hasUpdate$` - Update notifications
+
+**Signals** (Angular 16+):
+- `isReadySignal` - SDK ready state signal
+- `isReadyFromCacheSignal` - Cache ready state signal
+- `isTimedOutSignal` - Timeout state signal
+- `hasUpdateSignal` - Update notifications signal
+
+## Installation
+
+```bash
+npm install @splitsoftware/splitio-angular
+```
+
+## Migration Guide
+
+Migrating from the legacy service pattern to the provider pattern? Check out our comprehensive [Migration Guide](MIGRATION.md) with step-by-step instructions and code examples.
+
+## Advanced Usage
+
+### Using Signals (Angular 16+)
+
+Signals provide a reactive way to track SDK state with better performance and simpler syntax:
+
+```typescript
+import { Component, computed, effect, inject } from '@angular/core';
+import { SplitIoService } from '@splitsoftware/splitio-angular';
+
+@Component({
+  selector: 'app-feature',
+  template: `
+    @if (isReady()) {
+      <div>SDK is ready!</div>
+      @if (canShowFeature()) {
+        <p>Premium feature is enabled</p>
+      }
+    }
+    @if (isTimedOut()) {
+      <div>SDK initialization timed out</div>
+    }
+  `
+})
+export class FeatureComponent {
+  private splitService = inject(SplitIoService);
+  
+  // Use signals directly
+  readonly isReady = this.splitService.isReadySignal;
+  readonly isTimedOut = this.splitService.isTimedOutSignal;
+  
+  // Derive state using computed
+  readonly canShowFeature = computed(() => {
+    return this.isReady() && !this.isTimedOut();
+  });
+  
+  // React to state changes with effects
+  constructor() {
+    effect(() => {
+      if (this.isReady()) {
+        const treatment = this.splitService.getTreatment('premium-feature');
+        console.log('Feature treatment:', treatment);
+      }
+    });
+  }
+}
+```
+
+### Using Observables
+
+For applications not using signals, Observables provide the same functionality:
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { SplitIoService } from '@splitsoftware/splitio-angular';
+
+@Component({
+  selector: 'app-feature',
+  template: `
+    <div *ngIf="splitService.isReady$ | async">
+      SDK is ready!
+    </div>
+  `
+})
+export class FeatureComponent implements OnInit {
+  constructor(public splitService: SplitIoService) {}
+
+  ngOnInit() {
+    this.splitService.isReady$.subscribe(ready => {
+      if (ready) {
+        const treatment = this.splitService.getTreatment('premium-feature');
+        console.log('Feature treatment:', treatment);
+      }
+    });
+  }
+}
+```
+
+### Multiple Treatment Evaluation
+```typescript
+const treatments = splitService.getTreatments(['feature-a', 'feature-b', 'feature-c']);
+if (treatments['feature-a'] === 'on' && treatments['feature-b'] === 'enabled') {
+  // Both features are enabled
+}
+```
+
+### Track Events
+```typescript
+splitService.track('purchase', 'conversion', 99.99, {
+  productId: 'abc123',
+  category: 'electronics'
+});
+```
+
+### Guard with Custom Redirect
+```typescript
+const customGuard = createTreatmentGuard('premium-feature', 'on', '/upgrade');
+
+const routes: Routes = [
+  {
+    path: 'premium',
+    component: PremiumComponent,
+    canActivate: [customGuard]
+  }
+];
+```
+
+## API Documentation
+
+For detailed API documentation, see the [TypeScript definitions](projects/splitio/src/public-api.ts) or check out the [official Split.io documentation](https://help.split.io/hc/en-us/articles/6495326064397-Angular-utilities).
 
 ## Submitting issues
 

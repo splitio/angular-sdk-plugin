@@ -39,7 +39,8 @@
   "cli": {
     "schematicCollections": [
       "@angular-eslint/schematics"
-    ]
+    ],
+    "analytics": "8fdf748e-9436-4202-9186-c8c813c8243e"
   },
   "schematics": {
     "@angular-eslint/schematics:application": {

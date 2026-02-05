@@ -1,23 +1,31 @@
 import * as SplitIO from '@splitsoftware/splitio-browserjs/types/splitio';
 
 export function buildInstance(key: SplitIO.SplitKey): string {
-  // @ts-ignore
-  if (!key.bucketingKey) return key;
-  // @ts-ignore
-  return `${key.matchingKey ? key.matchingKey : key}-${key.bucketingKey ? key.bucketingKey : key}-`;
+  if (isString(key)) return key;
+  return `${key.matchingKey ? key.matchingKey : key.bucketingKey}-${key.bucketingKey ? key.bucketingKey : key.matchingKey}-`;
 }
 
-export function parseTreatmentParams(param1: string | string[] | SplitIO.SplitKey, param2?: string | string[] | SplitIO.Attributes, param3?: SplitIO.Attributes): any {
-  if (isString(param2) || Array.isArray(param2)) return { key: param1, featureFlagNames: param2, attributes: param3};
-  return { key: undefined, featureFlagNames: param1, attributes: param2 };
+export function parseTreatmentParams(
+  param1: string | string[] | SplitIO.SplitKey, 
+  param2?: string | string[] | SplitIO.Attributes, 
+  param3?: SplitIO.Attributes | SplitIO.EvaluationOptions, 
+  param4?: SplitIO.EvaluationOptions
+): any {
+  if (isString(param2) || Array.isArray(param2)) return { key: param1, featureFlagNames: param2, attributes: param3, options: param4 };
+  return { key: undefined, featureFlagNames: param1, attributes: param2, options: param3 };
 }
 
-export function parseFlagSetParams(param1: string | string[] | SplitIO.SplitKey, param2?: string | string[] | SplitIO.Attributes, param3?: SplitIO.Attributes): any {
-  if (isString(param2) || Array.isArray(param2)) return { key: param1, flagSetNames: param2, attributes: param3};
-  return { key: undefined, flagSetNames: param1, attributes: param2 };
+export function parseFlagSetParams(
+  param1: string | string[] | SplitIO.SplitKey, 
+  param2?: string | string[] | SplitIO.Attributes, 
+  param3?: SplitIO.Attributes | SplitIO.EvaluationOptions, 
+  param4?: SplitIO.EvaluationOptions
+): any {
+  if (isString(param2) || Array.isArray(param2)) return { key: param1, flagSetNames: param2, attributes: param3, options: param4 };
+  return { key: undefined, flagSetNames: param1, attributes: param2, options: param3 };
 }
 
-export function parseTrackParams(param1: string | SplitIO.SplitKey, param2: string, param3: number | string, param4: number | SplitIO.Properties, param5: SplitIO.Properties) {
+export function parseTrackParams(param1: string | SplitIO.SplitKey, param2: string, param3: number | string, param4: number | SplitIO.Properties, param5?: SplitIO.Properties) {
   if (isString(param3)) return { key: param1, trafficType: param2, eventType: param3, value: param4, properties: param5};
   return { key: undefined, trafficType: param1, eventType: param2, value: param3, properties: param4 };
 }

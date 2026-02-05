@@ -1,4 +1,4 @@
-# Contributing to the Split angular plugin
+# Contributing to the Split Angular plugin
 
 Split SDK is an open source project and we welcome feedback and contribution. The information below describes how to build the project with your changes, run the tests, and send the Pull Request(PR).
 

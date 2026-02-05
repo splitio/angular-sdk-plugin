@@ -1,0 +1,73 @@
+pipeline:
+  name: angular-sdk-plugin
+  identifier: angularsdkplugin
+  projectIdentifier: Harness_Split
+  orgIdentifier: PROD
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: fmegithubharnessgitops
+        repoName: angular-sdk-plugin
+        build: <+input>
+  stages:
+    - stage:
+        name: Check-Test-Build
+        identifier: Checkout_code
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          caching:
+            enabled: true
+            override: true
+            paths: []
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec:
+              size: small
+              imageSpec:
+                imageName: ubuntu-latest
+          buildIntelligence:
+            enabled: false
+          execution:
+            steps:
+              - step:
+                  type: Action
+                  name: Set up Node.js
+                  identifier: Set_up_Nodejs
+                  spec:
+                    uses: dcodeIO/setup-node-nvm@master
+                    with:
+                      node-version: 20
+              - step:
+                  type: Run
+                  name: npm ci
+                  identifier: npm_ci
+                  spec:
+                    shell: Sh
+                    command: npm ci
+              - step:
+                  type: Run
+                  name: npm run lint
+                  identifier: npm_run_lint
+                  spec:
+                    shell: Sh
+                    command: npm run lint
+              - step:
+                  type: Run
+                  name: npm run test
+                  identifier: npm_run_test
+                  spec:
+                    shell: Sh
+                    command: npm run test
+              - step:
+                  type: Run
+                  name: npm run build
+                  identifier: npm_run_build
+                  spec:
+                    shell: Sh
+                    command: npm run build

@@ -1,0 +1,15 @@
+inputSet:
+  name: angular-sdk-plugin
+  tags: {}
+  identifier: angularsdkplugin
+  orgIdentifier: PROD
+  projectIdentifier: Harness_Split
+  pipeline:
+    identifier: angularsdkplugin
+    properties:
+      ci:
+        codebase:
+          build:
+            type: branch
+            spec:
+              branch: <+trigger.branch>

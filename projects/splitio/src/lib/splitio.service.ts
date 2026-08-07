@@ -1,10 +1,65 @@
 import { Injectable } from '@angular/core';
+
+import {
+  from,
+  Observable,
+} from 'rxjs';
+
 import { SplitFactory } from '@splitsoftware/splitio-browserjs';
 import * as SplitIO from '@splitsoftware/splitio-browserjs/types/splitio';
-import { from, Observable } from 'rxjs';
-import { INIT_CLIENT_EXISTS, INIT_CLIENT_FIRST, CONTROL_CLIENT, DEFAULT_MANAGER, VERSION } from './utils/constants';
-import { buildInstance, parseFlagSetParams, parseTrackParams, parseTreatmentParams } from './utils/utils';
 
+import { Deprecated } from './deprecation';
+import {
+  CONTROL_CLIENT,
+  DEFAULT_MANAGER,
+  INIT_CLIENT_EXISTS,
+  INIT_CLIENT_FIRST,
+  VERSION,
+} from './utils/constants';
+import {
+  buildInstance,
+  parseFlagSetParams,
+  parseTrackParams,
+  parseTreatmentParams,
+} from './utils/utils';
+
+/**
+ * @deprecated Use SplitIoService with provideSplitIo() instead. This service will be removed in v5.0.0.
+ *
+ * Migration guide:
+ *
+ * Before:
+ * ```typescript
+ * constructor(private splitService: SplitService) {}
+ *
+ * ngOnInit() {
+ *   this.splitService.init(config).subscribe(() => {
+ *     // SDK ready
+ *   });
+ * }
+ * ```
+ *
+ * After:
+ * ```typescript
+ * // In main.ts
+ * bootstrapApplication(AppComponent, {
+ *   providers: [
+ *     provideSplitIo(withConfig(config))
+ *   ]
+ * });
+ *
+ * // In component
+ * constructor(private splitService: SplitIoService) {}
+ *
+ * ngOnInit() {
+ *   this.splitService.isReady$.subscribe(ready => {
+ *     if (ready) {
+ *       // SDK ready, auto-initialized
+ *     }
+ *   });
+ * }
+ * ```
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -52,7 +107,9 @@ export class SplitService {
    * @function init
    * @param {IClientSideSettings} config Should be an object that complies with the SplitIO.IClientSideSettings.
    * @returns {Observable<string>} Returns when sdk is ready
+   * @deprecated Use provideSplitIo() with withConfig() instead
    */
+  @Deprecated('provideSplitIo(withConfig(...))')
   init(config: SplitIO.IClientSideSettings): Observable<string> {
     if (this.splitio) {
       console.log('[ERROR] There is another instance of the SDK.');
